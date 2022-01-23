@@ -1,0 +1,134 @@
+[
+ {
+  "directory": "/home/lsl/dev/play/ray/raylib-game-template/src",
+  "arguments": [
+   "emcc",
+   "-c",
+   "raylib_game.c",
+   "-o",
+   "raylib_game.o",
+   "-std=c99",
+   "-Wall",
+   "-Wno-missing-braces",
+   "-Wunused-result",
+   "-D_DEFAULT_SOURCE",
+   "-Os",
+   "-I.",
+   "-I./src",
+   "-I./src/external",
+   "-I./src/extras",
+   "-DPLATFORM_WEB"
+  ],
+  "file": "raylib_game.c"
+ },
+ {
+  "directory": "/home/lsl/dev/play/ray/raylib-game-template/src",
+  "arguments": [
+   "emcc",
+   "-c",
+   "screen_logo.c",
+   "-o",
+   "screen_logo.o",
+   "-std=c99",
+   "-Wall",
+   "-Wno-missing-braces",
+   "-Wunused-result",
+   "-D_DEFAULT_SOURCE",
+   "-Os",
+   "-I.",
+   "-I./src",
+   "-I./src/external",
+   "-I./src/extras",
+   "-DPLATFORM_WEB"
+  ],
+  "file": "screen_logo.c"
+ },
+ {
+  "directory": "/home/lsl/dev/play/ray/raylib-game-template/src",
+  "arguments": [
+   "emcc",
+   "-c",
+   "screen_title.c",
+   "-o",
+   "screen_title.o",
+   "-std=c99",
+   "-Wall",
+   "-Wno-missing-braces",
+   "-Wunused-result",
+   "-D_DEFAULT_SOURCE",
+   "-Os",
+   "-I.",
+   "-I./src",
+   "-I./src/external",
+   "-I./src/extras",
+   "-DPLATFORM_WEB"
+  ],
+  "file": "screen_title.c"
+ },
+ {
+  "directory": "/home/lsl/dev/play/ray/raylib-game-template/src",
+  "arguments": [
+   "emcc",
+   "-c",
+   "screen_options.c",
+   "-o",
+   "screen_options.o",
+   "-std=c99",
+   "-Wall",
+   "-Wno-missing-braces",
+   "-Wunused-result",
+   "-D_DEFAULT_SOURCE",
+   "-Os",
+   "-I.",
+   "-I./src",
+   "-I./src/external",
+   "-I./src/extras",
+   "-DPLATFORM_WEB"
+  ],
+  "file": "screen_options.c"
+ },
+ {
+  "directory": "/home/lsl/dev/play/ray/raylib-game-template/src",
+  "arguments": [
+   "emcc",
+   "-c",
+   "screen_gameplay.c",
+   "-o",
+   "screen_gameplay.o",
+   "-std=c99",
+   "-Wall",
+   "-Wno-missing-braces",
+   "-Wunused-result",
+   "-D_DEFAULT_SOURCE",
+   "-Os",
+   "-I.",
+   "-I./src",
+   "-I./src/external",
+   "-I./src/extras",
+   "-DPLATFORM_WEB"
+  ],
+  "file": "screen_gameplay.c"
+ },
+ {
+  "directory": "/home/lsl/dev/play/ray/raylib-game-template/src",
+  "arguments": [
+   "emcc",
+   "-c",
+   "screen_ending.c",
+   "-o",
+   "screen_ending.o",
+   "-std=c99",
+   "-Wall",
+   "-Wno-missing-braces",
+   "-Wunused-result",
+   "-D_DEFAULT_SOURCE",
+   "-Os",
+   "-I.",
+   "-I./src",
+   "-I./src/external",
+   "-I./src/extras",
+   "-DPLATFORM_WEB"
+  ],
+  "file": "screen_ending.c"
+ }
+]
