@@ -1,0 +1,123 @@
+    { // Tri 1 / Floor 1
+        // Near Right Bottom Vertex
+        mesh.vertices[0] =  size.width/2  +padding;
+        mesh.vertices[1] = -size.height/2 -padding;
+        mesh.vertices[2] = 0;
+
+        // Far Right Bottom Vertex
+        mesh.vertices[3] =  size.width/2  +padding;
+        mesh.vertices[4] = -size.height/2 -padding;
+        mesh.vertices[5] = -depth;
+
+        // Far Left Bottom Vertex
+        mesh.vertices[6] = -size.width/2  -padding;
+        mesh.vertices[7] = -size.height/2 -padding;
+        mesh.vertices[8] = -depth;
+    }
+    { // Tri 2 / Floor 2
+        // Near Right Bottom Vertex
+        mesh.vertices[9] =   size.width/2  +padding;
+        mesh.vertices[10] = -size.height/2 -padding;
+        mesh.vertices[11] = 0;
+
+        // Far Left Bottom Vertex
+        mesh.vertices[12] = -size.width/2  -padding;
+        mesh.vertices[13] = -size.height/2 -padding;
+        mesh.vertices[14] = -depth;
+
+        // Near Left Bottom Vertex
+        mesh.vertices[15] = -size.width/2  -padding;
+        mesh.vertices[16] = -size.height/2 -padding;
+        mesh.vertices[17] = 0;
+    } { // Tri 3 / Left Wall 1
+        // Near Left Bottom Vertex
+        mesh.vertices[18] = -size.width/2  -padding;
+        mesh.vertices[19] = -size.height/2 -padding;
+        mesh.vertices[20] = 0;
+
+        // Far Left Bottom Vertex
+        mesh.vertices[21] = -size.width/2  -padding;
+        mesh.vertices[22] = -size.height/2 -padding;
+        mesh.vertices[23] = -depth;
+
+        // Far Left Top Vertex
+        mesh.vertices[24] = -size.width/2  -padding;
+        mesh.vertices[25] =  size.height/2 +padding;
+        mesh.vertices[26] = -depth;
+    } { // Tri 4 / Left Wall 2
+        // Near Left Bottom Vertex
+        mesh.vertices[27] = -size.width/2  -padding;
+        mesh.vertices[28] = -size.height/2 -padding;
+        mesh.vertices[29] = 0;
+
+        // Far Left Top Vertex
+        mesh.vertices[30] = -size.width/2  -padding;
+        mesh.vertices[31] =  size.height/2 +padding;
+        mesh.vertices[32] = -depth;
+
+        // Near Left Top Vertex
+        mesh.vertices[33] = -size.width/2  -padding;
+        mesh.vertices[34] =  size.height/2 +padding;
+        mesh.vertices[35] = 0;
+    } { // Tri 5 / Ceiling 1
+        // Near Left Top Vertex
+        mesh.vertices[36] = -size.width/2  -padding;
+        mesh.vertices[37] =  size.height/2 +padding;
+        mesh.vertices[38] = 0;
+
+        // Far Left Top Vertex
+        mesh.vertices[39] = -size.width/2  -padding;
+        mesh.vertices[40] =  size.height/2 +padding;
+        mesh.vertices[41] = -depth;
+
+        // Far Right Top Vertex
+        mesh.vertices[42] =  size.width/2  +padding;
+        mesh.vertices[43] =  size.height/2 +padding;
+        mesh.vertices[44] = -depth;
+    }
+    { // Tri 6 / Ceiling 2
+        // Near Left Top Vertex
+        mesh.vertices[45] = -size.width/2  -padding;
+        mesh.vertices[46] =  size.height/2 +padding;
+        mesh.vertices[47] = 0;
+
+        // Far Right Top Vertex
+        mesh.vertices[48] =  size.width/2  +padding;
+        mesh.vertices[49] =  size.height/2 +padding;
+        mesh.vertices[50] = -depth;
+
+        // Near Right Top Vertex
+        mesh.vertices[51] = +size.width/2  +padding;
+        mesh.vertices[52] =  size.height/2 +padding;
+        mesh.vertices[53] = 0;
+    } { // Tri 7 / Right Wall 1
+        // Near Right Top Vertex
+        mesh.vertices[54] = +size.width/2  +padding;
+        mesh.vertices[55] =  size.height/2 +padding;
+        mesh.vertices[56] = 0;
+
+        // Far Right Top Vertex
+        mesh.vertices[57] =  size.width/2  +padding;
+        mesh.vertices[58] =  size.height/2 +padding;
+        mesh.vertices[59] = -depth;
+
+        // Far Right Bottom Vertex
+        mesh.vertices[60] =  size.width/2  +padding;
+        mesh.vertices[61] = -size.height/2 -padding;
+        mesh.vertices[62] = -depth;
+    } { // Tri 8 / Right Wall 2
+        // Far Right Bottom Vertex
+        mesh.vertices[63] =  size.width/2  +padding;
+        mesh.vertices[64] = -size.height/2 -padding;
+        mesh.vertices[65] = -depth;
+
+        // Near Right Bottom Vertex
+        mesh.vertices[66] =  size.width/2  +padding;
+        mesh.vertices[67] = -size.height/2 -padding;
+        mesh.vertices[68] = 0;
+
+        // Near Right Top Vertex
+        mesh.vertices[69] = +size.width/2  +padding;
+        mesh.vertices[70] =  size.height/2 +padding;
+        mesh.vertices[71] = 0;
+    }

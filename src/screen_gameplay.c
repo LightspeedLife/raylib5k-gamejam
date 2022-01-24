@@ -35,6 +35,8 @@
 static int framesCounter = 0;
 static int finishScreen = 0;
 static Camera3D camera = { 0 };
+static float camera_distance = 10.0f;
+static float camera_target = -1000.0f;
 static Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
 static Vector2 delta = { 0 };
 static Vector2 delta_accum = { 0 };
@@ -43,15 +45,36 @@ static float camera_speed = 0.06f;
 static Rectangle game_bounds = { 0 };
 
 static struct tunnel {
-  Mesh floor;
-  Mesh wall;
+    Model mo;
 } tunnel;
+
+static Mesh
+tunnel_gen_mesh(const Rectangle size, float depth)
+{
+    Mesh mesh = { 0 };
+    mesh.triangleCount = 8; //8; // 2*4 walls
+    mesh.vertexCount = mesh.triangleCount*3; //16; // 4 walls, 4 verts each
+    mesh.vertices = (float *)MemAlloc(mesh.vertexCount*3*sizeof(float));    // 3 vertices, 3 coordinates each (x, y, z)
+    mesh.texcoords = (float *)MemAlloc(mesh.vertexCount*2*sizeof(float));   // 3 vertices, 2 coordinates each (x, y)
+    mesh.normals = (float *)MemAlloc(mesh.vertexCount*3*sizeof(float));     // 3 vertices, 3 coordinates each (x, y, z)
+
+    static float padding = 2.0f;
+    #include "tunnel_verts.txt"
+
+    // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
+    UploadMesh(&mesh, false);
+
+    return mesh;
+}
 
 static void
 init_tunnel(struct tunnel *tunnel)
 {
-    tunnel->floor = GenMeshPlane(game_bounds.width, 40, 1, 1);
-    tunnel->wall = GenMeshPlane(game_bounds.height, 40, 1, 1);
+    tunnel->mo = LoadModelFromMesh(tunnel_gen_mesh(game_bounds, 40));
+    Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
+    Texture2D texture = LoadTextureFromImage(checked);
+    UnloadImage(checked);
+    tunnel->mo.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
 }
 
 Vector2
@@ -98,28 +121,36 @@ InitGameplayScreen(void)
 
     set_game_bounds(17.5f, 10.0f);
 
-    camera.position = (Vector3){ 0.0f, 0.0f, 40.0f };  // Camera position
-    camera.target = (Vector3){ 0.0f, 0.0f, -100.0f };    // Camera looking at point
+    camera.position = (Vector3){ 0.0f, 10.0f, camera_distance };  // Camera position
+    camera.target = (Vector3){ 0.0f, 0.0f, camera_target };    // Camera looking at point
     camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-    camera.fovy = 20.0f;                                // Camera field-of-view Y
+    camera.fovy = 90.0f;                                // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;             // Camera mode type
+#ifdef _DEBUG
+    SetCameraMode(camera, CAMERA_FIRST_PERSON); // Set a first person camera mode
+#endif // _DEBUG
 
-    slew = (Vector2){ 1.4f, 1.4f };
+    slew = (Vector2){ 1.4f, 1.4f }; // FIXME: Use or lose
 
     cubePosition.x = 0.0f;
     cubePosition.y = 0.0f;
     cubePosition.z = 0.0f;
+
+    init_tunnel(&tunnel);
 }
 
 void
 UpdateGameplayScreen(void)
 {
+    delta = GetMouseDelta();
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
         DisableCursor();
-        delta = GetMouseDelta();
-//        if (1.8f > delta.x) delta.x = 1.8f;
-//        if (1.8f > delta.y) delta.y = 1.8f;
-        delta_accum = AddVector2(delta, delta_accum);
+//        static const float delta_bounds = 0.5f;
+//        if ( delta_bounds < delta_accum.x) delta_accum.x =  delta_bounds;
+//        if (-delta_bounds > delta_accum.x) delta_accum.x = -delta_bounds;
+//        if ( delta_bounds < delta_accum.y) delta_accum.y =  delta_bounds;
+//        if (-delta_bounds > delta_accum.y) delta_accum.y = -delta_bounds;
+        delta_accum = AddVector2(delta_accum, delta);
     } else EnableCursor();
     camera.position.x += camera_speed*(float)delta_accum.x;
     camera.position.y -= camera_speed*(float)delta_accum.y;
@@ -131,28 +162,34 @@ UpdateGameplayScreen(void)
     if (game_bounds.x +game_bounds.width  < camera.position.x) camera.position.x = game_bounds.x +game_bounds.width;
     if (game_bounds.y                     > camera.position.y) camera.position.y = game_bounds.y;
     if (game_bounds.y +game_bounds.height < camera.position.y) camera.position.y = game_bounds.y +game_bounds.height;
+
+    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+        camera.position.z += delta.y;
+    } if ((0.0f == delta.x && 0.0f == delta.y)
+          && IsMouseButtonReleased(MOUSE_BUTTON_RIGHT)) {
+        camera.position.z = camera_distance;
+    }
 }
 
 void
 DrawGameplayScreen(void)
 {
     ClearBackground(RAYWHITE);
-    BeginMode3D(camera);
-    DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
-    DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
+    BeginMode3D(camera); {
+//        DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
+        DrawCubeWires(cubePosition, 3.0f, 3.0f, 3.0f, MAROON);
+        DrawModelWires(tunnel.mo, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
+
 #ifdef _DEBUG
-    DrawGrid(100, 1.0f);
+        DrawGrid(100, 1.0f);
 #endif // _DEBUG
-    EndMode3D();
+    }; EndMode3D();
 
 #ifdef _DEBUG
     // 0
     char debug_delta[64] = "";
     sprintf(debug_delta, "delta x:%f, y:%f", delta.x, delta.y);
     DrawDebugText(debug_delta, 0);
-    static const unsigned int debug_height_min = 28;
-    static const unsigned int font_size = 16;
-    DrawText("hello", 10, 0*font_size +debug_height_min, font_size, DARKGREEN);
 
     // 1
     char debug_delta_accum[64] = "";
