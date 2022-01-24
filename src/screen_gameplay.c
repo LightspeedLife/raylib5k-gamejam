@@ -24,6 +24,9 @@
 **********************************************************************************************/
 
 #include "raylib.h"
+#include "raymath.h"
+#define RLIGHTS_IMPLEMENTATION
+#include "rlights.h"
 // TODO: Get tunnel/movement
 // TODO: Player movement
 // TODO: Obstacles
@@ -31,6 +34,12 @@
 
 #include <stdio.h>
 #include "screens.h"
+
+#if defined(PLATFORM_DESKTOP)
+    #define GLSL_VERSION            330
+#else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
+    #define GLSL_VERSION            100
+#endif
 
 static int framesCounter = 0;
 static int finishScreen = 0;
@@ -43,6 +52,26 @@ static Vector2 delta_accum = { 0 };
 static Vector2 slew = { 0 };
 static float camera_speed = 0.06f;
 static Rectangle game_bounds = { 0 };
+
+// Load shader and set up some uniforms
+Shader shader;
+float fogDensity = 0.15f;
+
+static void
+init_shader(Shader *shader)
+{
+    *shader = LoadShader(TextFormat("resources/shaders/glsl%i/base_lighting.vs", GLSL_VERSION),
+                                TextFormat("resources/shaders/glsl%i/fog.fs", GLSL_VERSION));
+    shader->locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(*shader, "matModel");
+    shader->locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(*shader, "viewPos");
+
+    // Ambient light level
+    int ambientLoc = GetShaderLocation(*shader, "ambient");
+    SetShaderValue(*shader, ambientLoc, (float[4]){ 0.2f, 0.2f, 0.2f, 1.0f }, SHADER_UNIFORM_VEC4);
+
+    int fogDensityLoc = GetShaderLocation(*shader, "fogDensity");
+    SetShaderValue(*shader, fogDensityLoc, &fogDensity, SHADER_UNIFORM_FLOAT);
+}
 
 static struct tunnel {
     Model mo;
@@ -71,7 +100,7 @@ static void
 init_tunnel(struct tunnel *tunnel)
 {
     tunnel->mo = LoadModelFromMesh(tunnel_gen_mesh(game_bounds, 40));
-    Image checked = GenImageChecked(2, 2, 1, 1, RED, GREEN);
+    Image checked = GenImageColor(1, 1, RAYWHITE);
     Texture2D texture = LoadTextureFromImage(checked);
     UnloadImage(checked);
     tunnel->mo.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
@@ -137,6 +166,9 @@ InitGameplayScreen(void)
     cubePosition.z = 0.0f;
 
     init_tunnel(&tunnel);
+    init_shader(&shader);
+    tunnel.mo.materials[0].shader = shader;
+    CreateLight(LIGHT_POINT, (Vector3){ 0, 2, 6 }, Vector3Zero(), WHITE, shader);
 }
 
 void
@@ -216,6 +248,8 @@ DrawGameplayScreen(void)
 void
 UnloadGameplayScreen(void)
 {
+    UnloadModel(tunnel.mo);
+    UnloadShader(shader);
 }
 
 // Gameplay Screen should finish?

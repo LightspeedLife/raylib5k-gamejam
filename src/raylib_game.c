@@ -80,15 +80,7 @@ int main(void)
     // De-Initialization
     //--------------------------------------------------------------------------------------
     // Unload current screen data before closing
-    switch (currentScreen)
-    {
-        case LOGO: UnloadLogoScreen(); break;
-        case TITLE: UnloadTitleScreen(); break;
-        case GAMEPLAY: UnloadGameplayScreen(); break;
-        case ENDING: UnloadEndingScreen(); break;
-        default: break;
-    }
-
+    UnloadGameplayScreen();
     // Unload global data loaded
     UnloadFont(font);
     UnloadMusicStream(music);

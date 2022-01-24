@@ -4,3 +4,7 @@
 /Makefile
 /build/
 /.dir-locals.el
+*.o
+raylib_game.js
+*.data
+*.wasm
