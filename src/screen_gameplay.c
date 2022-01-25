@@ -25,10 +25,8 @@
 
 #include "raylib.h"
 #include "raymath.h"
-#define RLIGHTS_IMPLEMENTATION
-#include "rlights.h"
 // TODO: Get tunnel/movement
-// TODO: Fog shader
+// DONE: Fog shader
 // TODO: Player movement
 // TODO: Obstacles
 // TODO: Čollisions
@@ -36,149 +34,9 @@
 
 #include <stdio.h>
 #include "screens.h"
-
-#if defined(PLATFORM_DESKTOP)
-    #define GLSL_VERSION            330
-#else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-    #define GLSL_VERSION            100
-#endif
-
-static int framesCounter = 0;
-static int finishScreen = 0;
-static Camera3D camera = { 0 };
-static float camera_distance = 1.0f;
-static float camera_target = -1000.0f;
-static Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
-static Vector2 delta = { 0 };
-static Vector2 delta_accum = { 0 };
-static Vector2 slew = { 0 };
-static float camera_speed = 0.06f;
-static Rectangle game_bounds = { 0 };
-static Color tunnelColor = { 240, 240, 240, 255 };
-
-// Load shader and set up some uniforms
-Shader shader;
-float fogDensity = 0.15f;
-Vector4 fogAmbient = { 0.2f, 0.2f, 0.2f, 1.0f };
-int fogColorLoc;
-Vector4 fogColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-int fogDensityLoc;
-
-static void
-init_shader(Shader *shader)
-{
-    *shader = LoadShader(TextFormat("resources/shaders/glsl%i/base_lighting.vs", GLSL_VERSION),
-                                TextFormat("resources/shaders/glsl%i/fog.fs", GLSL_VERSION));
-    shader->locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(*shader, "matModel");
-    shader->locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(*shader, "viewPos");
-    shader->locs[SHADER_LOC_COLOR_AMBIENT] = GetShaderLocation(*shader, "ambient");
-
-    fogColorLoc = GetShaderLocation(*shader, "fogColor");
-    SetShaderValue(*shader, fogColorLoc, &fogColor, SHADER_UNIFORM_VEC4);
-    // Ambient light level
-    // int ambientLoc = GetShaderLocation(*shader, "ambient");
-    // SetShaderValue(*shader, ambientLoc, (float[4]){ 0.2f, 0.2f, 0.2f, 1.0f }, SHADER_UNIFORM_VEC4);
-    SetShaderValue(*shader, shader->locs[SHADER_LOC_COLOR_AMBIENT], &fogAmbient, SHADER_UNIFORM_VEC4);
-
-    fogDensityLoc = GetShaderLocation(*shader, "fogDensity");
-    SetShaderValue(*shader, fogDensityLoc, &fogDensity, SHADER_UNIFORM_FLOAT);
-}
-
-static struct tunnel {
-    Model mo;
-} tunnel;
-
-static Mesh
-tunnel_gen_mesh(const Rectangle size, float depth)
-{
-    Mesh mesh = { 0 };
-    mesh.triangleCount = 8; //8; // 2*4 walls
-    mesh.vertexCount = mesh.triangleCount*3; //16; // 4 walls, 4 verts each
-    mesh.vertices = (float *)MemAlloc(mesh.vertexCount*3*sizeof(float));    // 3 vertices, 3 coordinates each (x, y, z)
-    mesh.texcoords = (float *)MemAlloc(mesh.vertexCount*2*sizeof(float));   // 3 vertices, 2 coordinates each (x, y)
-    mesh.normals = (float *)MemAlloc(mesh.vertexCount*3*sizeof(float));     // 3 vertices, 3 coordinates each (x, y, z)
-
-    static float padding = 2.0f;
-    #include "tunnel_verts.txt"
-
-    // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
-    UploadMesh(&mesh, false);
-
-    return mesh;
-}
-
-static void
-init_tunnel(struct tunnel *tunnel)
-{
-    tunnel->mo = LoadModelFromMesh(tunnel_gen_mesh(game_bounds, 40));
-    Image i = GenImageColor(1, 1, WHITE);
-    Texture texture = LoadTextureFromImage(i);
-    tunnel->mo.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
-    UnloadImage(i);
-    UnloadTexture(texture);
-}
-
-Vector2
-AddVector2(const Vector2 a, const Vector2 b)
-{
-    Vector2 re = { 0 };
-    re.x = a.x +b.x;
-    re.y = a.y +b.y;
-    return re;
-}
-
-Vector2
-SubVector2(const Vector2 a, const Vector2 b)
-{
-    Vector2 re = { 0 };
-    re.x = a.x -b.x;
-    re.y = a.y -b.y;
-    return re;
-}
-
-static void
-DrawDebugText(const char *text, unsigned int index)
-{
-    static const unsigned int debug_height_min = 28;
-    static const unsigned int font_size = 16;
-    DrawText(text, 10, index*font_size +debug_height_min, font_size, DARKGREEN);
-}
-
-static void
-set_game_bounds(float width, float height)
-{
-    game_bounds.width = width;
-    game_bounds.height = height;
-    game_bounds.x = -(width/2);
-    game_bounds.y = -(height/2);
-
-}
-
-void
-InitGameplayScreen(void)
-{
-    framesCounter = 0;
-    finishScreen = 0;
-
-    set_game_bounds(6.0f, 3.0f);
-
-    camera.position = (Vector3){ 0.0f, 10.0f, camera_distance };  // Camera position
-    camera.target = (Vector3){ 0.0f, 0.0f, camera_target };    // Camera looking at point
-    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-    camera.fovy = 90.0f;                                // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;             // Camera mode type
-
-    slew = (Vector2){ 1.4f, 1.4f }; // FIXME: Use or lose
-
-    cubePosition.x = 0.0f;
-    cubePosition.y = 0.0f;
-    cubePosition.z = 0.0f;
-
-    init_tunnel(&tunnel);
-    init_shader(&shader);
-    tunnel.mo.materials[0].shader = shader;
-    CreateLight(LIGHT_POINT, (Vector3){ 0, 2, 6 }, Vector3Zero(), WHITE, shader);
-}
+#include "globals.h"
+#include "utils.h"
+#include "init.h"
 
 void
 UpdateGameplayScreen(void)
@@ -239,7 +97,7 @@ UpdateGameplayScreen(void)
     }
     SetShaderValue(shader, fogColorLoc, &fogColor, SHADER_UNIFORM_VEC4);
     // Update the light shader with the camera view position
-    SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], &camera.position.x, SHADER_UNIFORM_VEC3);
+    // SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], &camera.position.x, SHADER_UNIFORM_VEC3);
 }
 
 void
