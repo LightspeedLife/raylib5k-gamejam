@@ -28,6 +28,7 @@
 #define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
 // TODO: Get tunnel/movement
+// TODO: Fog shader
 // TODO: Player movement
 // TODO: Obstacles
 // TODO: music
@@ -44,7 +45,7 @@
 static int framesCounter = 0;
 static int finishScreen = 0;
 static Camera3D camera = { 0 };
-static float camera_distance = 10.0f;
+static float camera_distance = 1.0f;
 static float camera_target = -1000.0f;
 static Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
 static Vector2 delta = { 0 };
@@ -52,10 +53,15 @@ static Vector2 delta_accum = { 0 };
 static Vector2 slew = { 0 };
 static float camera_speed = 0.06f;
 static Rectangle game_bounds = { 0 };
+static Color tunnelColor = { 240, 240, 240, 255 };
 
 // Load shader and set up some uniforms
 Shader shader;
 float fogDensity = 0.15f;
+Vector4 fogAmbient = { 0.2f, 0.2f, 0.2f, 1.0f };
+int fogColorLoc;
+Vector4 fogColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+int fogDensityLoc;
 
 static void
 init_shader(Shader *shader)
@@ -64,12 +70,16 @@ init_shader(Shader *shader)
                                 TextFormat("resources/shaders/glsl%i/fog.fs", GLSL_VERSION));
     shader->locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(*shader, "matModel");
     shader->locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(*shader, "viewPos");
+    shader->locs[SHADER_LOC_COLOR_AMBIENT] = GetShaderLocation(*shader, "ambient");
 
+    fogColorLoc = GetShaderLocation(*shader, "fogColor");
+    SetShaderValue(*shader, fogColorLoc, &fogColor, SHADER_UNIFORM_VEC4);
     // Ambient light level
-    int ambientLoc = GetShaderLocation(*shader, "ambient");
-    SetShaderValue(*shader, ambientLoc, (float[4]){ 0.2f, 0.2f, 0.2f, 1.0f }, SHADER_UNIFORM_VEC4);
+    // int ambientLoc = GetShaderLocation(*shader, "ambient");
+    // SetShaderValue(*shader, ambientLoc, (float[4]){ 0.2f, 0.2f, 0.2f, 1.0f }, SHADER_UNIFORM_VEC4);
+    SetShaderValue(*shader, shader->locs[SHADER_LOC_COLOR_AMBIENT], &fogAmbient, SHADER_UNIFORM_VEC4);
 
-    int fogDensityLoc = GetShaderLocation(*shader, "fogDensity");
+    fogDensityLoc = GetShaderLocation(*shader, "fogDensity");
     SetShaderValue(*shader, fogDensityLoc, &fogDensity, SHADER_UNIFORM_FLOAT);
 }
 
@@ -100,10 +110,11 @@ static void
 init_tunnel(struct tunnel *tunnel)
 {
     tunnel->mo = LoadModelFromMesh(tunnel_gen_mesh(game_bounds, 40));
-    Image checked = GenImageColor(1, 1, RAYWHITE);
-    Texture2D texture = LoadTextureFromImage(checked);
-    UnloadImage(checked);
+    Image i = GenImageColor(1, 1, WHITE);
+    Texture texture = LoadTextureFromImage(i);
     tunnel->mo.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+    UnloadImage(i);
+    UnloadTexture(texture);
 }
 
 Vector2
@@ -135,8 +146,8 @@ DrawDebugText(const char *text, unsigned int index)
 static void
 set_game_bounds(float width, float height)
 {
-    game_bounds.width = 17.5f;
-    game_bounds.height = 10.0f;
+    game_bounds.width = width;
+    game_bounds.height = height;
     game_bounds.x = -(width/2);
     game_bounds.y = -(height/2);
 
@@ -148,16 +159,13 @@ InitGameplayScreen(void)
     framesCounter = 0;
     finishScreen = 0;
 
-    set_game_bounds(17.5f, 10.0f);
+    set_game_bounds(6.0f, 3.0f);
 
     camera.position = (Vector3){ 0.0f, 10.0f, camera_distance };  // Camera position
     camera.target = (Vector3){ 0.0f, 0.0f, camera_target };    // Camera looking at point
     camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
     camera.fovy = 90.0f;                                // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;             // Camera mode type
-#ifdef _DEBUG
-    SetCameraMode(camera, CAMERA_FIRST_PERSON); // Set a first person camera mode
-#endif // _DEBUG
 
     slew = (Vector2){ 1.4f, 1.4f }; // FIXME: Use or lose
 
@@ -201,16 +209,46 @@ UpdateGameplayScreen(void)
           && IsMouseButtonReleased(MOUSE_BUTTON_RIGHT)) {
         camera.position.z = camera_distance;
     }
+
+    fogDensity -= 0.01f*GetMouseWheelMove();
+    SetShaderValue(shader, fogDensityLoc, &fogDensity, SHADER_UNIFORM_FLOAT);
+
+    if (IsKeyPressed(KEY_UP)) {
+        static const unsigned char x = 16;
+        tunnelColor.r += x;
+        tunnelColor.g += x;
+        tunnelColor.b += x;
+    } else if (IsKeyPressed(KEY_DOWN)) {
+        static const unsigned char x = 16;
+        tunnelColor.r -= x;
+        tunnelColor.g -= x;
+        tunnelColor.b -= x;
+    }
+
+    if (IsKeyPressed(KEY_LEFT)) {
+        static const float x = 0.1f;
+        fogColor.x -= x;
+        fogColor.y -= x;
+        fogColor.z -= x;
+    } else if (IsKeyPressed(KEY_RIGHT)) {
+        static const float x = 0.2f;
+        fogColor.x += x;
+        fogColor.y += x;
+        fogColor.z += x;
+    }
+    SetShaderValue(shader, fogColorLoc, &fogColor, SHADER_UNIFORM_VEC4);
+    // Update the light shader with the camera view position
+    SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], &camera.position.x, SHADER_UNIFORM_VEC3);
 }
 
 void
 DrawGameplayScreen(void)
 {
-    ClearBackground(RAYWHITE);
+    ClearBackground(BLACK);
     BeginMode3D(camera); {
 //        DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
-        DrawCubeWires(cubePosition, 3.0f, 3.0f, 3.0f, MAROON);
-        DrawModelWires(tunnel.mo, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
+        DrawCubeWires(cubePosition, 3.0f, 3.0f, 3.0f, tunnelColor);
+        DrawModel(tunnel.mo, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, tunnelColor);
 
 #ifdef _DEBUG
         DrawGrid(100, 1.0f);
@@ -241,6 +279,23 @@ DrawGameplayScreen(void)
         z = camera.position.z;
     sprintf(debug_camera_position, "cam_pos: x:%f, y:%f, z:%f", x, y, z);
     DrawDebugText(debug_camera_position, 3);
+
+    // 4
+    char debug_fog_density[64] = "";
+    sprintf(debug_fog_density, "fog_density: %f", fogDensity);
+    DrawDebugText(debug_fog_density, 4);
+
+    // 5
+    char debug_fog_color[64] = "";
+    sprintf(debug_fog_color, "fog_color: x:%f y:%f z:%f",
+        fogColor.x += x, fogColor.y += x, fogColor.z += x);
+    DrawDebugText(debug_fog_color, 5);
+
+    // 6
+    char debug_tunnel_color[64] = "";
+    sprintf(debug_tunnel_color, "tunnel_color: r:%u r:%u b:%u",
+            tunnelColor.r, tunnelColor.g, tunnelColor.b);
+    DrawDebugText(debug_tunnel_color, 6);
 #endif // _DEBUG
 }
 
