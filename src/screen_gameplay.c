@@ -31,6 +31,7 @@
 // TODO: Fog shader
 // TODO: Player movement
 // TODO: Obstacles
+// TODO: Čollisions
 // TODO: music
 
 #include <stdio.h>
@@ -288,7 +289,7 @@ DrawGameplayScreen(void)
     // 5
     char debug_fog_color[64] = "";
     sprintf(debug_fog_color, "fog_color: x:%f y:%f z:%f",
-        fogColor.x += x, fogColor.y += x, fogColor.z += x);
+        fogColor.x, fogColor.y, fogColor.z);
     DrawDebugText(debug_fog_color, 5);
 
     // 6
