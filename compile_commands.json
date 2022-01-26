@@ -2,7 +2,7 @@
  {
   "directory": "/home/lsl/dev/play/ray/raylib-game-template/src",
   "arguments": [
-   "emcc",
+   "gcc",
    "-c",
    "raylib_game.c",
    "-o",
@@ -14,18 +14,20 @@
    "-D_DEFAULT_SOURCE",
    "-g",
    "-D_DEBUG",
+   "-D_DEFAULT_SOURCE",
    "-I.",
-   "-I./src",
-   "-I./src/external",
-   "-I./src/extras",
-   "-DPLATFORM_WEB"
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src",
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src/external",
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src/extras",
+   "-I/usr/local/include",
+   "-DPLATFORM_DESKTOP"
   ],
   "file": "raylib_game.c"
  },
  {
   "directory": "/home/lsl/dev/play/ray/raylib-game-template/src",
   "arguments": [
-   "emcc",
+   "gcc",
    "-c",
    "screen_logo.c",
    "-o",
@@ -37,18 +39,20 @@
    "-D_DEFAULT_SOURCE",
    "-g",
    "-D_DEBUG",
+   "-D_DEFAULT_SOURCE",
    "-I.",
-   "-I./src",
-   "-I./src/external",
-   "-I./src/extras",
-   "-DPLATFORM_WEB"
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src",
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src/external",
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src/extras",
+   "-I/usr/local/include",
+   "-DPLATFORM_DESKTOP"
   ],
   "file": "screen_logo.c"
  },
  {
   "directory": "/home/lsl/dev/play/ray/raylib-game-template/src",
   "arguments": [
-   "emcc",
+   "gcc",
    "-c",
    "screen_title.c",
    "-o",
@@ -60,18 +64,20 @@
    "-D_DEFAULT_SOURCE",
    "-g",
    "-D_DEBUG",
+   "-D_DEFAULT_SOURCE",
    "-I.",
-   "-I./src",
-   "-I./src/external",
-   "-I./src/extras",
-   "-DPLATFORM_WEB"
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src",
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src/external",
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src/extras",
+   "-I/usr/local/include",
+   "-DPLATFORM_DESKTOP"
   ],
   "file": "screen_title.c"
  },
  {
   "directory": "/home/lsl/dev/play/ray/raylib-game-template/src",
   "arguments": [
-   "emcc",
+   "gcc",
    "-c",
    "screen_options.c",
    "-o",
@@ -83,18 +89,20 @@
    "-D_DEFAULT_SOURCE",
    "-g",
    "-D_DEBUG",
+   "-D_DEFAULT_SOURCE",
    "-I.",
-   "-I./src",
-   "-I./src/external",
-   "-I./src/extras",
-   "-DPLATFORM_WEB"
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src",
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src/external",
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src/extras",
+   "-I/usr/local/include",
+   "-DPLATFORM_DESKTOP"
   ],
   "file": "screen_options.c"
  },
  {
   "directory": "/home/lsl/dev/play/ray/raylib-game-template/src",
   "arguments": [
-   "emcc",
+   "gcc",
    "-c",
    "screen_gameplay.c",
    "-o",
@@ -106,18 +114,20 @@
    "-D_DEFAULT_SOURCE",
    "-g",
    "-D_DEBUG",
+   "-D_DEFAULT_SOURCE",
    "-I.",
-   "-I./src",
-   "-I./src/external",
-   "-I./src/extras",
-   "-DPLATFORM_WEB"
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src",
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src/external",
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src/extras",
+   "-I/usr/local/include",
+   "-DPLATFORM_DESKTOP"
   ],
   "file": "screen_gameplay.c"
  },
  {
   "directory": "/home/lsl/dev/play/ray/raylib-game-template/src",
   "arguments": [
-   "emcc",
+   "gcc",
    "-c",
    "screen_ending.c",
    "-o",
@@ -129,11 +139,13 @@
    "-D_DEFAULT_SOURCE",
    "-g",
    "-D_DEBUG",
+   "-D_DEFAULT_SOURCE",
    "-I.",
-   "-I./src",
-   "-I./src/external",
-   "-I./src/extras",
-   "-DPLATFORM_WEB"
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src",
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src/external",
+   "-I/home/lsl/dev/play/ray/raylib-game-template/src/extras",
+   "-I/usr/local/include",
+   "-DPLATFORM_DESKTOP"
   ],
   "file": "screen_ending.c"
  }

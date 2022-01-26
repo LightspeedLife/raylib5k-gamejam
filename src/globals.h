@@ -30,7 +30,7 @@ Shader shader;
 float fogDensity = 0.15f;
 Vector4 fogAmbient = { 0.2f, 0.2f, 0.2f, 1.0f };
 int fogColorLoc;
-Vector4 fogColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+Vector4 fogColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 int fogDensityLoc;
 
 static struct tunnel {
@@ -46,5 +46,9 @@ static struct obstacles {
     Vector3 size;
     float speed;
 } g_obstacles[OBSTACLES_LIM];
+
+static int g_obstacle_max_width,
+           g_obstacle_max_height,
+           g_obstacle_max_depth;
 
 #endif // _GLOBALS_H

@@ -25,11 +25,16 @@
 
 #include "raylib.h"
 #include "raymath.h"
-// TODO: Get tunnel/movement
+// DONE: Get tunnel/movement
 // DONE: Fog shader
 // TODO: Player movement
 // TODO: Obstacles
-// TODO: Čollisions
+// TODO: Collisions
+// TODO: invest or something
+// TODO: walks
+// TODO: open up an HVCU
+// TODO: start getting therapy
+// TODO: learn to type
 // TODO: music
 
 #include <stdio.h>
@@ -39,28 +44,27 @@
 #include "init.h"
 
 void
-spawn_obstacle(struct obstacles *obstacles)
+spawn_obstacle(struct obstacles *o)
 {
     // just randomly create obstacles here
-    while (obstacles->active && (OBSTACLES_LIM != (obstacles -g_obstacles)))
-        obstacles++;
-    if (OBSTACLES_IS_OOB(obstacles))
-        return;
+    TraceLog(LOG_DEBUG, "spawn start");
+    int i = 0;
+    for (; i < OBSTACLES_LIM; i++)
+        if (o->active) continue;
+    if (OBSTACLES_LIM == i) return;
 
-    const int obstacle_max_width = 3,
-              obstacle_max_height = 3,
-              obstacle_max_depth = game_bounds.depth;
-    obstacles->active = 1;
-    obstacles->pos.x = (float)GetRandomValue(game_bounds.shape.x,
+    TraceLog(LOG_DEBUG, "spawning obstacle [%d]", i);
+    o->active = 1;
+    o->pos.x = (float)GetRandomValue(game_bounds.shape.x,
                                              game_bounds.shape.x +game_bounds.shape.width)
                         *world_units;
-    obstacles->pos.y = (float)GetRandomValue(game_bounds.shape.y,
+    o->pos.y = (float)GetRandomValue(game_bounds.shape.y,
                                              game_bounds.shape.y +game_bounds.shape.height)
                         *world_units;
-    obstacles->pos.z = -game_bounds.depth;
-    obstacles->size.x = (float)GetRandomValue(1, obstacle_max_width)*world_units;
-    obstacles->size.y = (float)GetRandomValue(1, obstacle_max_height)*world_units;
-    obstacles->size.z = (float)GetRandomValue(1, obstacle_max_depth)*world_units;
+    o->pos.z = -game_bounds.depth;
+    o->size.x = (float)GetRandomValue(1, g_obstacle_max_width)*world_units;
+    o->size.y = (float)GetRandomValue(1, g_obstacle_max_height)*world_units;
+    o->size.z = (float)GetRandomValue(1, g_obstacle_max_depth)*world_units;
 }
 
 void
@@ -83,11 +87,28 @@ update_obstacle(struct obstacles *o, float frame_time)
 
 void
 draw_obstacles(struct obstacles *o)
-{}
+{
+    TraceLog(LOG_DEBUG, "drawing obstacles");
+    for (int i = 0; i < OBSTACLES_LIM; i++)
+        if (o[i].active) DrawCubeV(o->pos, o->size, RED);
+}
 
 void
 UpdateGameplayScreen(void)
 {
+    static float time_since_spawn = 0.0f;
+    static float spawn_interval = 2.0f;
+    float this_frame = GetFrameTime();
+    // 7
+    char debug_frame_time[64] = "";
+    sprintf(debug_frame_time, "this_frame: %f", this_frame);
+    DrawDebugText(debug_frame_time, 7);
+    time_since_spawn += this_frame;
+    update_obstacle(g_obstacles, this_frame);
+    if (spawn_interval >= time_since_spawn) {
+        spawn_obstacle(g_obstacles);
+        time_since_spawn = 0.0f;
+    }
     delta = GetMouseDelta();
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
         DisableCursor();
@@ -150,15 +171,13 @@ UpdateGameplayScreen(void)
 void
 DrawGameplayScreen(void)
 {
-    ClearBackground(BLACK);
+    ClearBackground(WHITE);
     BeginMode3D(camera); {
 //        DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
         DrawCubeWires(cubePosition, 3.0f, 3.0f, 3.0f, tunnelColor);
         DrawModel(tunnel.mo, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, tunnelColor);
-
-#ifdef _DEBUG
-        DrawGrid(100, 1.0f);
-#endif // _DEBUG
+        draw_obstacles(g_obstacles);
+        DrawCubeV((Vector3){0, 0, 0}, (Vector3){1, 1, 1}, RED);
     }; EndMode3D();
 
 #ifdef _DEBUG

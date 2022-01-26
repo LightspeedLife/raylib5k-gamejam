@@ -16,8 +16,8 @@ init_obstacles(struct obstacles *obstacles)
 static void
 init_shader(Shader *shader)
 {
-    *shader = LoadShader(TextFormat("resources/shaders/glsl%i/base_lighting.vs", GLSL_VERSION),
-                                TextFormat("resources/shaders/glsl%i/fog.fs", GLSL_VERSION));
+    *shader = LoadShader(TextFormat("resources/shaders/glsl100/base_lighting.vs"),
+                                TextFormat("resources/shaders/glsl100i/fog.fs"));
     shader->locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(*shader, "matModel");
     shader->locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(*shader, "viewPos");
     shader->locs[SHADER_LOC_COLOR_AMBIENT] = GetShaderLocation(*shader, "ambient");
@@ -79,6 +79,7 @@ InitGameplayScreen(void)
     framesCounter = 0;
     finishScreen = 0;
 
+    SetRandomSeed((unsigned int)GetTime());
     set_game_bounds(6.0f, 3.0f, 20.0f);
 
     camera.position = (Vector3){ 0.0f, 10.0f, camera_distance };  // Camera position
@@ -98,6 +99,9 @@ InitGameplayScreen(void)
     tunnel.mo.materials[0].shader = shader;
     CreateLight(LIGHT_POINT, (Vector3){ 0, 2, 6 }, Vector3Zero(), WHITE, shader);
 
+    g_obstacle_max_depth = game_bounds.depth;
+    g_obstacle_max_width = 3;
+    g_obstacle_max_height = 3;
     init_obstacles(g_obstacles);
 }
 
