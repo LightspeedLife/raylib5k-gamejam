@@ -93,19 +93,21 @@ draw_obstacles(struct obstacles *o)
         if (o[i].active) DrawCubeV(o->pos, o->size, RED);
 }
 
+char debug_frame_time[64] = "";
+char debug_time_since_spawn[64] = "";
+static float time_since_spawn = 0.0f;
+
 void
 UpdateGameplayScreen(void)
 {
-    static float time_since_spawn = 0.0f;
     static float spawn_interval = 2.0f;
     float this_frame = GetFrameTime();
-    // 7
-    char debug_frame_time[64] = "";
-    sprintf(debug_frame_time, "this_frame: %f", this_frame);
-    DrawDebugText(debug_frame_time, 7);
     time_since_spawn += this_frame;
+    // 7
+    sprintf(debug_frame_time, "this_frame: %f", this_frame);
+    sprintf(debug_time_since_spawn, "time_since_spawn: %f", time_since_spawn);
     update_obstacle(g_obstacles, this_frame);
-    if (spawn_interval >= time_since_spawn) {
+    if (spawn_interval <= time_since_spawn) {
         spawn_obstacle(g_obstacles);
         time_since_spawn = 0.0f;
     }
@@ -221,6 +223,12 @@ DrawGameplayScreen(void)
     sprintf(debug_tunnel_color, "tunnel_color: r:%u r:%u b:%u",
             tunnelColor.r, tunnelColor.g, tunnelColor.b);
     DrawDebugText(debug_tunnel_color, 6);
+
+    // 7
+    DrawDebugText(debug_frame_time, 7);
+
+    // 8
+    DrawDebugText(debug_time_since_spawn, 8);
 #endif // _DEBUG
 }
 

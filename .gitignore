@@ -4,7 +4,10 @@
 /Makefile
 /build/
 /.dir-locals.el
-*.o
+**.o
 raylib_game.js
-*.data
-*.wasm
+**.data
+**.wasm
+/src/raylib_game
+*.png
+compile_commands.json

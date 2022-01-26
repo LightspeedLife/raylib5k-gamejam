@@ -17,7 +17,7 @@ static void
 init_shader(Shader *shader)
 {
     *shader = LoadShader(TextFormat("resources/shaders/glsl100/base_lighting.vs"),
-                                TextFormat("resources/shaders/glsl100i/fog.fs"));
+                                TextFormat("resources/shaders/glsl100/fog.fs"));
     shader->locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(*shader, "matModel");
     shader->locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(*shader, "viewPos");
     shader->locs[SHADER_LOC_COLOR_AMBIENT] = GetShaderLocation(*shader, "ambient");
