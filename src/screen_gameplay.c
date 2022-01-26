@@ -44,27 +44,36 @@
 #include "init.h"
 
 void
+debug_obstacles(struct obstacles *o)
+{
+    char dbg_os[64] = "dbg_obstacles: ";
+    for (int i = 0; i < OBSTACLES_LIM; i++)
+        dbg_os[i +15] = o[i].active +0x30;
+    DrawDebugText(dbg_os, 9);
+}
+
+void
 spawn_obstacle(struct obstacles *o)
 {
     // just randomly create obstacles here
-    TraceLog(LOG_DEBUG, "spawn start");
     int i = 0;
     for (; i < OBSTACLES_LIM; i++)
-        if (o->active) continue;
+        if (!o[i].active) break;
     if (OBSTACLES_LIM == i) return;
 
-    TraceLog(LOG_DEBUG, "spawning obstacle [%d]", i);
-    o->active = 1;
-    o->pos.x = (float)GetRandomValue(game_bounds.shape.x,
-                                             game_bounds.shape.x +game_bounds.shape.width)
-                        *world_units;
-    o->pos.y = (float)GetRandomValue(game_bounds.shape.y,
-                                             game_bounds.shape.y +game_bounds.shape.height)
-                        *world_units;
-    o->pos.z = -game_bounds.depth;
-    o->size.x = (float)GetRandomValue(1, g_obstacle_max_width)*world_units;
-    o->size.y = (float)GetRandomValue(1, g_obstacle_max_height)*world_units;
-    o->size.z = (float)GetRandomValue(1, g_obstacle_max_depth)*world_units;
+    o[i].active = 1;
+    {
+        o[i].pos.x =
+            (float)GetRandomValue(game_bounds.shape.x, game_bounds.shape.x +game_bounds.shape.width)
+            * 1 +world_units;
+        o[i].pos.y =
+            (float)GetRandomValue(game_bounds.shape.y, game_bounds.shape.y +game_bounds.shape.height)
+            * 1 +world_units;
+        o[i].pos.z = -game_bounds.depth;
+        o[i].size.x = (float)GetRandomValue(1, g_obstacle_max_width) * 1 +world_units;
+        o[i].size.y = (float)GetRandomValue(1, g_obstacle_max_height) * 1 +world_units;
+        o[i].size.z = (float)GetRandomValue(1, g_obstacle_max_depth) * 1 +world_units;
+    }
 }
 
 void
@@ -77,18 +86,14 @@ void
 update_obstacle(struct obstacles *o, float frame_time)
 {
     for (int i = 0; i < OBSTACLES_LIM; i++) {
-        if (!o->active)
-            continue;
-        if ((game_bounds.depth < o[i].pos.z -o[i].size.z))
-            despawn_obstacle(o);
         o->pos.z += frame_time*o->speed;
+        if (camera.position.z <= o->pos.z -o->size.z) despawn_obstacle(o);
     }
 }
 
 void
 draw_obstacles(struct obstacles *o)
 {
-    TraceLog(LOG_DEBUG, "drawing obstacles");
     for (int i = 0; i < OBSTACLES_LIM; i++)
         if (o[i].active) DrawCubeV(o->pos, o->size, RED);
 }
@@ -179,7 +184,6 @@ DrawGameplayScreen(void)
         DrawCubeWires(cubePosition, 3.0f, 3.0f, 3.0f, tunnelColor);
         DrawModel(tunnel.mo, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, tunnelColor);
         draw_obstacles(g_obstacles);
-        DrawCubeV((Vector3){0, 0, 0}, (Vector3){1, 1, 1}, RED);
     }; EndMode3D();
 
 #ifdef _DEBUG
@@ -229,6 +233,8 @@ DrawGameplayScreen(void)
 
     // 8
     DrawDebugText(debug_time_since_spawn, 8);
+
+    debug_obstacles(g_obstacles);
 #endif // _DEBUG
 }
 

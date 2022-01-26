@@ -10,6 +10,7 @@ init_obstacles(struct obstacles *obstacles)
 {
 	for (int i = 0; i < OBSTACLES_LIM; i++) {
 		obstacles[i].active = 0;
+        obstacles[i].speed = 1.5f;
 	}
 }
 
@@ -76,6 +77,7 @@ set_game_bounds(float width, float height, float depth)
 void
 InitGameplayScreen(void)
 {
+    SetTraceLogLevel(LOG_DEBUG);
     framesCounter = 0;
     finishScreen = 0;
 
