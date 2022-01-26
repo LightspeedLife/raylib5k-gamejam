@@ -39,6 +39,53 @@
 #include "init.h"
 
 void
+spawn_obstacle(struct obstacles *obstacles)
+{
+    // just randomly create obstacles here
+    while (obstacles->active && (OBSTACLES_LIM != (obstacles -g_obstacles)))
+        obstacles++;
+    if (OBSTACLES_IS_OOB(obstacles))
+        return;
+
+    const int obstacle_max_width = 3,
+              obstacle_max_height = 3,
+              obstacle_max_depth = game_bounds.depth;
+    obstacles->active = 1;
+    obstacles->pos.x = (float)GetRandomValue(game_bounds.shape.x,
+                                             game_bounds.shape.x +game_bounds.shape.width)
+                        *world_units;
+    obstacles->pos.y = (float)GetRandomValue(game_bounds.shape.y,
+                                             game_bounds.shape.y +game_bounds.shape.height)
+                        *world_units;
+    obstacles->pos.z = -game_bounds.depth;
+    obstacles->size.x = (float)GetRandomValue(1, obstacle_max_width)*world_units;
+    obstacles->size.y = (float)GetRandomValue(1, obstacle_max_height)*world_units;
+    obstacles->size.z = (float)GetRandomValue(1, obstacle_max_depth)*world_units;
+}
+
+void
+despawn_obstacle(struct obstacles *o)
+{
+    o->active = 0;
+}
+
+void
+update_obstacle(struct obstacles *o, float frame_time)
+{
+    for (int i = 0; i < OBSTACLES_LIM; i++) {
+        if (!o->active)
+            continue;
+        if ((game_bounds.depth < o[i].pos.z -o[i].size.z))
+            despawn_obstacle(o);
+        o->pos.z += frame_time*o->speed;
+    }
+}
+
+void
+draw_obstacles(struct obstacles *o)
+{}
+
+void
 UpdateGameplayScreen(void)
 {
     delta = GetMouseDelta();
@@ -57,10 +104,10 @@ UpdateGameplayScreen(void)
     delta_accum.y -= 4*camera_speed*delta_accum.y;
 
     // cap camera position
-    if (game_bounds.x                     > camera.position.x) camera.position.x = game_bounds.x;
-    if (game_bounds.x +game_bounds.width  < camera.position.x) camera.position.x = game_bounds.x +game_bounds.width;
-    if (game_bounds.y                     > camera.position.y) camera.position.y = game_bounds.y;
-    if (game_bounds.y +game_bounds.height < camera.position.y) camera.position.y = game_bounds.y +game_bounds.height;
+    if (game_bounds.shape.x                     > camera.position.x) camera.position.x = game_bounds.shape.x;
+    if (game_bounds.shape.x +game_bounds.shape.width  < camera.position.x) camera.position.x = game_bounds.shape.x +game_bounds.shape.width;
+    if (game_bounds.shape.y                     > camera.position.y) camera.position.y = game_bounds.shape.y;
+    if (game_bounds.shape.y +game_bounds.shape.height < camera.position.y) camera.position.y = game_bounds.shape.y +game_bounds.shape.height;
 
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
         camera.position.z += delta.y;
@@ -128,7 +175,7 @@ DrawGameplayScreen(void)
     // 2
     char debug_bounds[64] = "";
     sprintf(debug_bounds, "bounds: <%f,%f> %fx%f",
-        game_bounds.x, game_bounds.y, game_bounds.width, game_bounds.height);
+        game_bounds.shape.x, game_bounds.shape.y, game_bounds.shape.width, game_bounds.shape.height);
     DrawDebugText(debug_bounds, 2);
 
     // 3

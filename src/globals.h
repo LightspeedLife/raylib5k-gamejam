@@ -18,7 +18,11 @@ static Vector2 delta = { 0 };
 static Vector2 delta_accum = { 0 };
 static Vector2 slew = { 0 };
 static float camera_speed = 0.06f;
-static Rectangle game_bounds = { 0 };
+static struct game_bounds {
+    Rectangle shape;
+    float depth;
+} game_bounds;
+float world_units;
 static Color tunnelColor = { 240, 240, 240, 255 };
 
 // Load shader and set up some uniforms
@@ -32,5 +36,15 @@ int fogDensityLoc;
 static struct tunnel {
     Model mo;
 } tunnel;
+
+#define OBSTACLES_LIM 16
+#define OBSTACLES_IS_OOB(ptr) ((g_obstacles >= (ptr)) || (g_obstacles +OBSTACLES_LIM <= (ptr)))
+
+static struct obstacles {
+    int active;
+    Vector3 pos;
+    Vector3 size;
+    float speed;
+} g_obstacles[OBSTACLES_LIM];
 
 #endif // _GLOBALS_H

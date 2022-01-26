@@ -6,6 +6,14 @@
 #include "globals.h"
 
 static void
+init_obstacles(struct obstacles *obstacles)
+{
+	for (int i = 0; i < OBSTACLES_LIM; i++) {
+		obstacles[i].active = 0;
+	}
+}
+
+static void
 init_shader(Shader *shader)
 {
     *shader = LoadShader(TextFormat("resources/shaders/glsl%i/base_lighting.vs", GLSL_VERSION),
@@ -36,7 +44,7 @@ tunnel_gen_mesh(const Rectangle size, float depth)
     mesh.normals = (float *)MemAlloc(mesh.vertexCount*3*sizeof(float));     // 3 vertices, 3 coordinates each (x, y, z)
 
     static float padding = 2.0f;
-    #include "tunnel_verts.txt"
+    #include "tunnel_verts.txt" // uses depth
 
     // Upload mesh data from CPU (RAM) to GPU (VRAM) memory
     UploadMesh(&mesh, false);
@@ -47,7 +55,7 @@ tunnel_gen_mesh(const Rectangle size, float depth)
 static void
 init_tunnel(struct tunnel *tunnel)
 {
-    tunnel->mo = LoadModelFromMesh(tunnel_gen_mesh(game_bounds, 40));
+    tunnel->mo = LoadModelFromMesh(tunnel_gen_mesh(game_bounds.shape, game_bounds.depth));
     Image i = GenImageColor(1, 1, WHITE);
     Texture texture = LoadTextureFromImage(i);
     tunnel->mo.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
@@ -56,13 +64,13 @@ init_tunnel(struct tunnel *tunnel)
 }
 
 static void
-set_game_bounds(float width, float height)
+set_game_bounds(float width, float height, float depth)
 {
-    game_bounds.width = width;
-    game_bounds.height = height;
-    game_bounds.x = -(width/2);
-    game_bounds.y = -(height/2);
-
+    game_bounds.shape.width = width;
+    game_bounds.shape.height = height;
+    game_bounds.shape.x = -(width/2);
+    game_bounds.shape.y = -(height/2);
+    game_bounds.depth = depth;
 }
 
 void
@@ -71,7 +79,7 @@ InitGameplayScreen(void)
     framesCounter = 0;
     finishScreen = 0;
 
-    set_game_bounds(6.0f, 3.0f);
+    set_game_bounds(6.0f, 3.0f, 20.0f);
 
     camera.position = (Vector3){ 0.0f, 10.0f, camera_distance };  // Camera position
     camera.target = (Vector3){ 0.0f, 0.0f, camera_target };    // Camera looking at point
@@ -89,6 +97,8 @@ InitGameplayScreen(void)
     init_shader(&shader);
     tunnel.mo.materials[0].shader = shader;
     CreateLight(LIGHT_POINT, (Vector3){ 0, 2, 6 }, Vector3Zero(), WHITE, shader);
+
+    init_obstacles(g_obstacles);
 }
 
 

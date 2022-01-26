@@ -1,6 +1,6 @@
 #ifndef _UTILS_H
 #define _UTILS_H
-#include "raylib.h"
+
 
 Vector2
 AddVector2(const Vector2 a, const Vector2 b)
