@@ -28,8 +28,8 @@
 // DONE: Get tunnel/movement
 // DONE: Fog shader
 // ACTIVE: Obstacles
-    // TODO: debug obstacle pool fill
-    // TODO: obstacles use fog shader
+    // DONE: debug obstacle pool fill
+    // DONE: obstacles use fog shader
     // TODO: multi-obstacle spawn
     // TODO: obstacle speed rate adjust
     // TODO: obstacle spawn rate adjust
@@ -104,8 +104,10 @@ update_obstacle(struct obstacles *o, float frame_time)
 void
 draw_obstacles(struct obstacles *o)
 {
+    BeginShaderMode(shader);
     for (int i = 0; i < OBSTACLES_LIM; i++)
         if (o[i].active) DrawCubeV(o[i].pos, o[i].size, o[i].colr);
+    EndShaderMode();
 }
 
 char debug_frame_time[64] = "";
