@@ -41,11 +41,14 @@ static struct tunnel {
 #define OBSTACLES_IS_OOB(ptr) ((g_obstacles >= (ptr)) || (g_obstacles +OBSTACLES_LIM <= (ptr)))
 
 static struct obstacles {
+    int id;
     int active;
     Vector3 pos;
     Vector3 size;
     float speed;
+    Color colr;
 } g_obstacles[OBSTACLES_LIM];
+Color obs_state_color[2] = { GREEN, RED };
 
 static int g_obstacle_max_width,
            g_obstacle_max_height,

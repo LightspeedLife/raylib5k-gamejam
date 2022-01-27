@@ -9,8 +9,10 @@ static void
 init_obstacles(struct obstacles *obstacles)
 {
 	for (int i = 0; i < OBSTACLES_LIM; i++) {
+        obstacles[i].id = i;
 		obstacles[i].active = 0;
         obstacles[i].speed = 1.5f;
+        obstacles[i].colr = RED;
 	}
 }
 
@@ -82,7 +84,7 @@ InitGameplayScreen(void)
     finishScreen = 0;
 
     SetRandomSeed((unsigned int)GetTime());
-    set_game_bounds(6.0f, 3.0f, 20.0f);
+    set_game_bounds(6.0f, 3.0f, 100.0f);
 
     camera.position = (Vector3){ 0.0f, 10.0f, camera_distance };  // Camera position
     camera.target = (Vector3){ 0.0f, 0.0f, camera_target };    // Camera looking at point
