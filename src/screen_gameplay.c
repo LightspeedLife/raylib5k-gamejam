@@ -34,6 +34,7 @@
     // TODO: obstacle speed rate adjust
     // TODO: obstacle spawn rate adjust
 // TODO: Pickups
+// TODO: scoring
 // DONE: Player movement
 // TODO: music
 
@@ -42,15 +43,6 @@
 #include "globals.h"
 #include "utils.h"
 #include "init.h"
-
-void
-debug_obstacles(struct obstacles *o)
-{
-    char dbg_os[64] = "dbg_obstacles: ";
-    for (int i = 0; i < OBSTACLES_LIM; i++)
-        dbg_os[i +15] = o[i].active +0x30;
-    DrawDebugText(dbg_os, 9);
-}
 
 void
 spawn_obstacle(struct obstacles *o)
@@ -209,57 +201,6 @@ DrawGameplayScreen(void)
         draw_obstacles(g_obstacles);
         player_draw(&player);
     }; EndMode3D();
-
-#ifdef _DEBUG
-    // 0
-    char debug_delta[64] = "";
-    sprintf(debug_delta, "delta x:%f, y:%f", delta.x, delta.y);
-    DrawDebugText(debug_delta, 0);
-
-    // 1
-    char debug_delta_accum[64] = "";
-    sprintf(debug_delta_accum, "accum: <%f,%f>", delta_accum.x, delta_accum.y);
-    DrawDebugText(debug_delta_accum, 1);
-
-    // 2
-    char debug_bounds[64] = "";
-    sprintf(debug_bounds, "bounds: <%f,%f> %fx%f",
-        game_bounds.shape.x, game_bounds.shape.y, game_bounds.shape.width, game_bounds.shape.height);
-    DrawDebugText(debug_bounds, 2);
-
-    // 3
-    char debug_camera_position[64] = "";
-    float x = camera.position.x,
-        y = camera.position.y,
-        z = camera.position.z;
-    sprintf(debug_camera_position, "cam_pos: x:%f, y:%f, z:%f", x, y, z);
-    DrawDebugText(debug_camera_position, 3);
-
-    // 4
-    char debug_fog_density[64] = "";
-    sprintf(debug_fog_density, "fog_density: %f", fogDensity);
-    DrawDebugText(debug_fog_density, 4);
-
-    // 5
-    char debug_fog_color[64] = "";
-    sprintf(debug_fog_color, "fog_color: x:%f y:%f z:%f",
-        fogColor.x, fogColor.y, fogColor.z);
-    DrawDebugText(debug_fog_color, 5);
-
-    // 6
-    char debug_tunnel_color[64] = "";
-    sprintf(debug_tunnel_color, "tunnel_color: r:%u r:%u b:%u",
-            tunnelColor.r, tunnelColor.g, tunnelColor.b);
-    DrawDebugText(debug_tunnel_color, 6);
-
-    // 7
-    DrawDebugText(debug_frame_time, 7);
-
-    // 8
-    DrawDebugText(debug_time_since_spawn, 8);
-
-    debug_obstacles(g_obstacles);
-#endif // _DEBUG
 }
 
 // Gameplay Screen Unload logic
