@@ -30,6 +30,12 @@ camera_update(Camera *cam, Vector3 target, float frame_time)
 
     cam->position.x += camera_speed*(target.x -cam->position.x)*frame_time;
     cam->position.y += camera_speed*(target.y -cam->position.y)*frame_time;
+
+    // cap camera position
+    if (game_bounds.shape.x                     > camera.position.x) camera.position.x = game_bounds.shape.x;
+    if (game_bounds.shape.x +game_bounds.shape.width  < camera.position.x) camera.position.x = game_bounds.shape.x +game_bounds.shape.width;
+    if (game_bounds.shape.y                     > camera.position.y) camera.position.y = game_bounds.shape.y;
+    if (game_bounds.shape.y +game_bounds.shape.height < camera.position.y) camera.position.y = game_bounds.shape.y +game_bounds.shape.height;
 }
 
 #endif // _PLAYER_H
