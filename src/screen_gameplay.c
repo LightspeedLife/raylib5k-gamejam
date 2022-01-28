@@ -43,83 +43,8 @@
 #include "globals.h"
 #include "utils.h"
 #include "init.h"
-
-void
-spawn_obstacle(struct obstacles *o)
-{
-    // just randomly create obstacles here
-    int i = 0;
-    for (; i < OBSTACLES_LIM; i++)
-        if (!o[i].active) break;
-    if (OBSTACLES_LIM == i) return;
-
-    o[i].active = 1;
-    {
-        o[i].pos.x =
-            (float)GetRandomValue(game_bounds.shape.x, game_bounds.shape.x +game_bounds.shape.width)
-            * 1 +world_units;
-        o[i].pos.y =
-            (float)GetRandomValue(game_bounds.shape.y, game_bounds.shape.y +game_bounds.shape.height)
-            * 1 +world_units;
-        o[i].pos.z = -game_bounds.depth;
-        o[i].size.x = (float)GetRandomValue(1, g_obstacle_max_width) * 1 +world_units;
-        o[i].size.y = (float)GetRandomValue(1, g_obstacle_max_height) * 1 +world_units;
-        o[i].size.z = (float)GetRandomValue(1, g_obstacle_max_depth) * 1 +world_units;
-    }
-}
-
-void
-despawn_obstacle(struct obstacles *o)
-{
-    o->active = 0;
-}
-
-void
-update_obstacle(struct obstacles *o, float frame_time)
-{
-    for (int i = 0; i < OBSTACLES_LIM; i++) {
-        if (!o[i].active) continue;
-        o[i].pos.z += frame_time*o[i].speed;
-        if (0 <= o[i].pos.z -o[i].size.z)
-            despawn_obstacle(&o[i]);
-    }
-}
-
-void
-draw_obstacles(struct obstacles *o)
-{
-    for (int i = 0; i < OBSTACLES_LIM; i++)
-        if (o[i].active) DrawCubeV(o[i].pos, o[i].size, o[i].colr);
-}
-
-void
-player_update(struct player *p, Vector2 target, float frame_time)
-{
-    p->pos.x += frame_time * p->speed * (target.x -p->pos.x);
-    p->pos.y -= frame_time * p->speed * (target.y -p->pos.y);
-
-    // clamp position
-    if (game_bounds.shape.x > p->pos.x) p->pos.x = game_bounds.shape.x;
-    if (game_bounds.shape.y > p->pos.y) p->pos.y = game_bounds.shape.y;
-    if (game_bounds.shape.x +game_bounds.shape.width < p->pos.x)
-        p->pos.x = game_bounds.shape.x +game_bounds.shape.width;
-    if (game_bounds.shape.y +game_bounds.shape.height < p->pos.y)
-        p->pos.y = game_bounds.shape.y +game_bounds.shape.height;
-}
-
-void
-player_draw(struct player *p)
-{
-    DrawModelWiresEx(p->body, p->pos, (Vector3){ 1.0f, 0.0f, 0.0f }, -90.0f, (Vector3){ 0.3f, 0.3f, 0.3f }, WHITE);
-}
-
-void
-camera_update(Camera *cam, Vector3 target, float frame_time)
-{
-
-    cam->position.x += camera_speed*(target.x -cam->position.x)*frame_time;
-    cam->position.y += camera_speed*(target.y -cam->position.y)*frame_time;
-}
+#include "obstacles.h"
+#include "player.h"
 
 char debug_frame_time[64] = "";
 char debug_time_since_spawn[64] = "";
