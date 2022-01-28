@@ -12,7 +12,7 @@ init_obstacles(struct obstacles *obstacles)
 	for (int i = 0; i < OBSTACLES_LIM; i++) {
         obstacles[i].id = i;
 		obstacles[i].active = 0;
-        obstacles[i].speed = 8.4;
+        obstacles[i].speed = 24.0;
         obstacles[i].colr = RED;
 	}
 }
@@ -121,7 +121,7 @@ InitGameplayScreen(void)
     tunnel.mo.materials[0].shader = shader;
     CreateLight(LIGHT_POINT, (Vector3){ 0, 2, 6 }, Vector3Zero(), WHITE, shader);
 
-    g_obstacle_max_depth = 10;
+    g_obstacle_max_depth = 20;
     g_obstacle_max_width = 3;
     g_obstacle_max_height = 3;
     init_obstacles(g_obstacles);

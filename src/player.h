@@ -21,7 +21,7 @@ player_update(struct player *p, Vector2 target, float frame_time)
 void
 player_draw(struct player *p)
 {
-    DrawModelWiresEx(p->body, p->pos, (Vector3){ 1.0f, 0.0f, 0.0f }, -90.0f, (Vector3){ 0.3f, 0.3f, 0.3f }, WHITE);
+    DrawModelWiresEx(p->body, p->pos, (Vector3){ 1.0f, 0.0f, 0.0f }, -90.0f, (Vector3){ 0.1f, 0.1f, 0.1f }, WHITE);
 }
 
 void

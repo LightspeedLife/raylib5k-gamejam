@@ -38,7 +38,7 @@ static struct tunnel {
     Model mo;
 } tunnel;
 
-#define OBSTACLES_LIM 16
+#define OBSTACLES_LIM 32
 #define OBSTACLES_IS_OOB(ptr) ((g_obstacles >= (ptr)) || (g_obstacles +OBSTACLES_LIM <= (ptr)))
 
 static struct obstacles {

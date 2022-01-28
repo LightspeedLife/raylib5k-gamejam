@@ -53,7 +53,7 @@ void
 UpdateGameplayScreen(void)
 {
     delta = GetMouseDelta();
-    static float spawn_interval = 2.0f;
+    static float spawn_interval = 0.3f;
     float this_frame = GetFrameTime();
     time_since_spawn += this_frame;
     update_obstacle(g_obstacles, this_frame);
