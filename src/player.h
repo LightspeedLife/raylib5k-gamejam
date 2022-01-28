@@ -6,8 +6,8 @@
 void
 player_update(struct player *p, Vector2 target, float frame_time)
 {
-    p->pos.x += frame_time * p->speed * (target.x -p->pos.x);
-    p->pos.y -= frame_time * p->speed * (target.y -p->pos.y);
+    p->pos.x += frame_time * p->speed * target.x;
+    p->pos.y -= frame_time * p->speed * target.y;
 
     // clamp position
     if (game_bounds.shape.x > p->pos.x) p->pos.x = game_bounds.shape.x;
