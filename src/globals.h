@@ -11,16 +11,17 @@
 static int framesCounter = 0;
 static int finishScreen = 0;
 static Camera3D camera = { 0 };
-static float camera_distance = 1.0f;
+static float camera_distance = 0.0f;
 static float camera_target = -1000.0f;
 static Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
 static Vector2 delta = { 0 };
 static Vector2 delta_accum = { 0 };
 static Vector2 slew = { 0 };
-static float camera_speed = 0.06f;
+static float camera_speed = 8.2f;
 static struct game_bounds {
     Rectangle shape;
     float depth;
+    float padding;
 } game_bounds;
 float world_units;
 static Color tunnelColor = { 240, 240, 240, 255 };
@@ -53,5 +54,12 @@ Color obs_state_color[2] = { GREEN, RED };
 static int g_obstacle_max_width,
            g_obstacle_max_height,
            g_obstacle_max_depth;
+
+static struct player {
+    Vector3 pos;
+    Model body;
+    Matrix transform;
+    float speed;
+} player;
 
 #endif // _GLOBALS_H

@@ -33,13 +33,8 @@
     // TODO: multi-obstacle spawn
     // TODO: obstacle speed rate adjust
     // TODO: obstacle spawn rate adjust
-// TODO: Player movement
-// TODO: Collisions
-// TODO: invest or something
-// TODO: walks
-// TODO: open up an HVCU
-// TODO: start getting therapy
-// TODO: learn to type
+// TODO: Pickups
+// DONE: Player movement
 // TODO: music
 
 #include <stdio.h>
@@ -66,7 +61,6 @@ spawn_obstacle(struct obstacles *o)
         if (!o[i].active) break;
     if (OBSTACLES_LIM == i) return;
 
-    TraceLog(LOG_DEBUG, "spawning %d", o->id);
     o[i].active = 1;
     {
         o[i].pos.x =
@@ -80,13 +74,11 @@ spawn_obstacle(struct obstacles *o)
         o[i].size.y = (float)GetRandomValue(1, g_obstacle_max_height) * 1 +world_units;
         o[i].size.z = (float)GetRandomValue(1, g_obstacle_max_depth) * 1 +world_units;
     }
-    TraceLog(LOG_DEBUG, "obstacle %d pos: %f,%f size: %f,%f", i, o[i].pos.x, o[i].pos.y, o[i].size.x, o[i].size.y);
 }
 
 void
 despawn_obstacle(struct obstacles *o)
 {
-    TraceLog(LOG_DEBUG, "despawning %d", o->id);
     o->active = 0;
 }
 
@@ -104,10 +96,37 @@ update_obstacle(struct obstacles *o, float frame_time)
 void
 draw_obstacles(struct obstacles *o)
 {
-    BeginShaderMode(shader);
     for (int i = 0; i < OBSTACLES_LIM; i++)
         if (o[i].active) DrawCubeV(o[i].pos, o[i].size, o[i].colr);
-    EndShaderMode();
+}
+
+void
+player_update(struct player *p, Vector2 target, float frame_time)
+{
+    p->pos.x += frame_time * p->speed * (target.x -p->pos.x);
+    p->pos.y -= frame_time * p->speed * (target.y -p->pos.y);
+
+    // clamp position
+    if (game_bounds.shape.x > p->pos.x) p->pos.x = game_bounds.shape.x;
+    if (game_bounds.shape.y > p->pos.y) p->pos.y = game_bounds.shape.y;
+    if (game_bounds.shape.x +game_bounds.shape.width < p->pos.x)
+        p->pos.x = game_bounds.shape.x +game_bounds.shape.width;
+    if (game_bounds.shape.y +game_bounds.shape.height < p->pos.y)
+        p->pos.y = game_bounds.shape.y +game_bounds.shape.height;
+}
+
+void
+player_draw(struct player *p)
+{
+    DrawModelWiresEx(p->body, p->pos, (Vector3){ 1.0f, 0.0f, 0.0f }, -90.0f, (Vector3){ 0.3f, 0.3f, 0.3f }, WHITE);
+}
+
+void
+camera_update(Camera *cam, Vector3 target, float frame_time)
+{
+
+    cam->position.x += camera_speed*(target.x -cam->position.x)*frame_time;
+    cam->position.y += camera_speed*(target.y -cam->position.y)*frame_time;
 }
 
 char debug_frame_time[64] = "";
@@ -117,6 +136,7 @@ static float time_since_spawn = 0.0f;
 void
 UpdateGameplayScreen(void)
 {
+    delta = GetMouseDelta();
     static float spawn_interval = 2.0f;
     float this_frame = GetFrameTime();
     time_since_spawn += this_frame;
@@ -128,20 +148,11 @@ UpdateGameplayScreen(void)
         spawn_obstacle(g_obstacles);
         time_since_spawn = 0.0f;
     }
-    delta = GetMouseDelta();
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
         DisableCursor();
-//        static const float delta_bounds = 0.5f;
-//        if ( delta_bounds < delta_accum.x) delta_accum.x =  delta_bounds;
-//        if (-delta_bounds > delta_accum.x) delta_accum.x = -delta_bounds;
-//        if ( delta_bounds < delta_accum.y) delta_accum.y =  delta_bounds;
-//        if (-delta_bounds > delta_accum.y) delta_accum.y = -delta_bounds;
-        delta_accum = AddVector2(delta_accum, delta);
+        player_update(&player, delta, this_frame);
     } else EnableCursor();
-    camera.position.x += camera_speed*(float)delta_accum.x;
-    camera.position.y -= camera_speed*(float)delta_accum.y;
-    delta_accum.x -= 4*camera_speed*delta_accum.x;
-    delta_accum.y -= 4*camera_speed*delta_accum.y;
+    camera_update(&camera, player.pos, this_frame);
 
     // cap camera position
     if (game_bounds.shape.x                     > camera.position.x) camera.position.x = game_bounds.shape.x;
@@ -196,6 +207,7 @@ DrawGameplayScreen(void)
         DrawCubeWires(cubePosition, 3.0f, 3.0f, 3.0f, tunnelColor);
         DrawModel(tunnel.mo, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, tunnelColor);
         draw_obstacles(g_obstacles);
+        player_draw(&player);
     }; EndMode3D();
 
 #ifdef _DEBUG
