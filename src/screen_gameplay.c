@@ -57,7 +57,7 @@ draw_score()
     char score_str[64] = "";
     static const unsigned score_fontsize = 26;
     static const Color score_color = LIME;
-    sprintf(score_str, "%lu", score);
+    sprintf(score_str, "%lld", score);
     DrawText(score_str,
              GetScreenWidth() -MeasureText(score_str, score_fontsize) -10,
              10, score_fontsize, score_color);
@@ -79,30 +79,69 @@ void
 draw_thatwasclose(float *level, float this_frame)
 {
     static const char thatwasclose[] = "that was close!";
-    static const unsigned int thatwasclose_size = 56;
-    static const float distance = 5.0f;
-    static const unsigned int min = 80;
-    DrawText(thatwasclose, (GetScreenWidth() / 2) -(MeasureText(thatwasclose, thatwasclose_size) / 2),
-             (long)level * distance +min, thatwasclose_size, GOLD);
+    static const unsigned int thatwasclose_size = 48;
+    static const float distance = 200.0f;
+    static const unsigned int min = 150;
+    DrawText(thatwasclose, (GetScreenWidth()/2) -(MeasureText(thatwasclose, thatwasclose_size)/2),
+             *level * distance +(GetScreenHeight()/2 -distance -min), thatwasclose_size, GOLD);
+//    DrawText("test", (GetScreenWidth()/2), (GetScreenHeight()/2), thatwasclose_size, GOLD);
     *level -= this_frame;
 }
 
 void
 update_score(float this_frame)
 {
+    // NOTE: maybe add score/lose sounds here?
     static float this_tick = 0.0f;
+    static int was_close = 0;
     this_tick += this_frame;
     sec_accum += this_frame;
 
+    switch (player.side) {
+        case PLAYER_CLOSE: {
+            if (!was_close) {
+                was_close = 1;
+                close_float = 1.0f;
+            }
+            if (tick < this_tick) {
+                score += multiplier;
+                this_tick = 0.0f;
+            }
+        } break;
+        case PLAYER_IN: {
+            was_close = 0;
+            if (1 < multiplier) {
+                score -= multiplier * 10;
+                sec_accum = 0.0f;
+                multiplier = 1; // :'C  I weep for thee
+            } else score -= 100;
+        } break;
+        default: {
+            if (was_close) should_draw_thatwasclose = 1;
+            was_close = 0;
+        }
+    }
     if (sec_per_inc < sec_accum) {
         multiplier++;
         score += 10;
         sec_accum = 0.0f;
     }
-    if (PLAYER_CLOSE == player.side) {
-        if (tick < this_tick) {
-            score += multiplier;
-            this_tick = 0.0f;
+}
+
+void UpdateGameplayScreen(void);
+
+void
+update_game_state(void)
+{
+    switch (game_state) {
+        case GAME_NEW: {
+            // TODO: handle new game
+        } break;
+        case GAME_ONGOING: {
+            UpdateGameplayScreen();
+        } break;
+        case GAME_OVER: {
+            // TODO: handle game over
         }
     }
 }
@@ -176,13 +215,14 @@ DrawGameplayScreen(void)
         player_draw(&player);
     }; EndMode3D();
     draw_score();
+    if (should_draw_thatwasclose) draw_thatwasclose(&close_float, this_frame);
+    if (0.0f >= close_float) should_draw_thatwasclose = 0;
     draw_multiplier();
-    if (0.0f < should_draw_thatwasclose)
-        draw_thatwasclose(&should_draw_thatwasclose, this_frame);
 
 #ifdef _DEBUG
-    DrawDebugText(1, "should draw? %f", should_draw_thatwasclose);
-    DrawDebugText(2, "player state? %s", ((PLAYER_OUT == player.side)? "OUT"
+    DrawDebugText(1, "should draw? %i", should_draw_thatwasclose);
+    DrawDebugText(2, "close float? %f", close_float);
+    DrawDebugText(3, "player state? %s", ((PLAYER_OUT == player.side)? "OUT"
                                           : (PLAYER_CLOSE == player.side)? "CLOSE"
                                           : "IN"));
 #endif // _DEBUG
