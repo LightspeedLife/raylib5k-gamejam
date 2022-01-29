@@ -9,7 +9,7 @@ spawn_obstacle(struct obstacles *o)
     // just randomly create obstacles here
     int i = 0;
     for (; i < OBSTACLES_LIM; i++)
-        if (!o[i].active) break;
+        if (!o[i].active) continue;
     if (OBSTACLES_LIM == i) return;
 
     o[i].active = 1;
