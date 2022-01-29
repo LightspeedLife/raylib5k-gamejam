@@ -118,7 +118,6 @@ InitGameplayScreen(void)
     framesCounter = 0;
     finishScreen = 0;
 
-    SetRandomSeed((unsigned int)GetTime());
     set_game_bounds(6.0f, 3.0f, 40.0f, 0.2f);
 
     camera.position = (Vector3){ 0.0f, 0.0f, camera_distance };  // Camera position
