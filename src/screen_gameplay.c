@@ -276,7 +276,7 @@ draw_newgame(void)
         player_draw(&player);
     }; EndMode3D();
     {
-        static char prompt[32] = "Click or tap to begin.";
+        static char prompt[32] = "Hold left mouse to move.";
         static const unsigned int font_size = 36;
         unsigned int text_len = MeasureText(prompt, font_size);
         DrawText(prompt, GetScreenWidth()/2 -text_len/2, GetScreenHeight()/2, font_size, GREEN);
