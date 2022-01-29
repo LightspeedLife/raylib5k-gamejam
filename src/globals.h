@@ -46,10 +46,12 @@ static struct obstacles {
     int active;
     Vector3 pos;
     Vector3 size;
+    BoundingBox close;
     float speed;
     Color colr;
 } g_obstacles[OBSTACLES_LIM];
 Color obs_state_color[2] = { GREEN, RED };
+float ob_pad = 0.5f;
 
 static int g_obstacle_max_width,
            g_obstacle_max_height,
@@ -58,6 +60,8 @@ static int g_obstacle_max_width,
 static struct player {
     Vector3 pos;
     Model body;
+    Vector3 scale;
+    BoundingBox collision;
     Matrix transform;
     float speed;
 } player;

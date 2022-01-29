@@ -35,6 +35,7 @@
     // TODO: obstacle spawn rate adjust
 // TODO: Pickups
 // TODO: scoring
+// DONE: collision
 // DONE: Player movement
 // TODO: music
 

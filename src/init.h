@@ -88,6 +88,15 @@ init_player()
     player.body = LoadModelFromMesh(m);
     player.transform = MatrixRotate((Vector3){ 1.0f, 0.0f, 0.0f }, -(2*PI)/4);
     player.pos = (Vector3){ 0.0f, 0.0f, -2.0f };
+    player.scale = (Vector3){ 0.1f, 0.1f, 0.1f };
+    player.collision = (BoundingBox){
+        .min = player.pos,
+        .max = (Vector3){
+            player.pos.x +player.scale.x,
+            player.pos.y +player.scale.y,
+            player.pos.z +player.scale.z,
+        }
+    };
     Image img = GenImageColor(1, 1, GOLD);
     Texture txr = LoadTextureFromImage(img);
     player.body.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = txr;
