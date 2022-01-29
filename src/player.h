@@ -38,7 +38,7 @@ player_draw(struct player *p)
             p->pos.x,
             p->pos.y,
             p->pos.z -p->scale.z/2,
-        }, p->scale.x/2, 0.0f, 12, GOLD);
+        }, p->scale.x/2, 0.0f, 12, RED);
     DrawCylinderWiresEx(
         (Vector3){
             p->pos.x,
@@ -49,7 +49,7 @@ player_draw(struct player *p)
             p->pos.x,
             p->pos.y,
             p->pos.z -p->scale.z/2,
-        }, p->scale.x, 0.0f, 4, GOLD);
+        }, p->scale.x, 0.0f, 4, RED);
 //    DrawCubeWiresV(
 //        (Vector3){
 //            p->collision.min.x +(p->collision.max.x -p->collision.min.x) /2,

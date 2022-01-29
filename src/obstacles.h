@@ -95,7 +95,7 @@ update_obstacle(struct obstacles *o, float frame_time)
 void
 draw_obstacles(struct obstacles *o)
 {
-//    BeginShaderMode(shader);
+    BeginShaderMode(shader);
     for (int i = 0; i < OBSTACLES_LIM; i++)
         if (o[i].active) {
 //            DrawCubeV(o[i].pos , o[i].size, o[i].colr),
@@ -104,7 +104,7 @@ draw_obstacles(struct obstacles *o)
 //            DrawCubeV(o[i].close.min, (Vector3){ 0.3f, 0.3f, 0.3f }, DARKGREEN),
 //            DrawCubeV(o[i].close.max, (Vector3){ 0.3f, 0.3f, 0.3f }, DARKBLUE);
         }
-//    EndShaderMode();
+    EndShaderMode();
 }
 
 

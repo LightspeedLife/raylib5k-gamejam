@@ -104,7 +104,6 @@ update_score(float this_frame)
     static int was_close = 0;
     this_tick += this_frame;
     sec_accum += this_frame;
-    if (tick < this_tick) this_tick = 0.0f;
 
     switch (player.side) {
         case PLAYER_CLOSE: {
@@ -131,6 +130,7 @@ update_score(float this_frame)
             was_close = 0;
         }
     }
+    if (tick < this_tick) this_tick = 0.0f;
     if (sec_per_inc < sec_accum) {
         multiplier++;
         score += 100;
@@ -146,6 +146,7 @@ reset(void)
 {
     framesCounter = 0;
     finishScreen = 0;
+    should_shake_screen = 0;
     score = high_score = 0;
     camera.position = (Vector3){ 0.0f, 0.0f, camera_distance };  // Camera position
     camera.target = (Vector3){ 0.0f, 0.0f, camera_target };    // Camera looking at point
