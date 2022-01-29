@@ -99,7 +99,7 @@ update_score(float this_frame)
         score += 10;
         sec_accum = 0.0f;
     }
-    if (player.is_close) {
+    if (PLAYER_CLOSE == player.side) {
         if (tick < this_tick) {
             score += multiplier;
             this_tick = 0.0f;
@@ -182,8 +182,9 @@ DrawGameplayScreen(void)
 
 #ifdef _DEBUG
     DrawDebugText(1, "should draw? %f", should_draw_thatwasclose);
-    DrawDebugText(2, "became close? %d", player.became_close);
-    DrawDebugText(3, "is close? %d", player.is_close);
+    DrawDebugText(2, "player state? %s", ((PLAYER_OUT == player.side)? "OUT"
+                                          : (PLAYER_CLOSE == player.side)? "CLOSE"
+                                          : "IN"));
 #endif // _DEBUG
 }
 

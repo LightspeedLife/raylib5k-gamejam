@@ -75,17 +75,18 @@ update_obstacle(struct obstacles *o, float frame_time)
         o[i].body.max.z += frame_time * speed;
         o[i].close.min.z += frame_time * speed;
         o[i].close.max.z += frame_time * speed;
-        if (player.collision.min.z <= o[i].close.max.z) {
+
+        if (player.collision.min.z <= o[i].close.max.z) { // player can collide
             o[i].colr = GREEN;
-            if (CheckCollisionBoxes(o[i].body, player.collision))
-                /* TODO: go to post-game screen */
+            if (CheckCollisionBoxes(o[i].body, player.collision)) {
+                player.side = PLAYER_IN;
                 o[i].colr = BLUE;
-            if (CheckCollisionBoxes(o[i].close, player.collision)
-                && !CheckCollisionBoxes(o[i].body, player.collision)) {
+                /* TODO: go to post-game screen */
+            } else if (CheckCollisionBoxes(o[i].close, player.collision)) {
+                player.side = PLAYER_CLOSE;
                 o[i].colr = PURPLE;
                 /* ACTIVE: increment score and say "That was Close!" */
-                if (!player.is_close) player.became_close = player.is_close = 1;
-            } else player.is_close = 0;
+            } else player.side = PLAYER_OUT;
         } else o[i].colr = RED;
         if (0 <= o[i].body.min.z)
             despawn_obstacle(&o[i]);

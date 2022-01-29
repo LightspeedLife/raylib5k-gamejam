@@ -107,8 +107,7 @@ init_player()
  //   UnloadImage(img);
  //   UnloadTexture(txr);
     player.speed = 0.2f;
-    player.is_close = 0;
-    player.became_close = 0;
+    player.side = PLAYER_OUT;
 }
 
 void
