@@ -88,6 +88,15 @@ draw_thatwasclose(float *level, float this_frame)
 }
 
 void
+shake_screen(float *brrr, float this_frame)
+{
+    static const float amp = 0.1f;
+    camera.position.x += (float)GetRandomValue(0, 100)/100 * amp -(amp/2);
+    camera.position.y += (float)GetRandomValue(0, 100)/100 * amp -(amp/2);
+    *brrr -= this_frame;
+}
+
+void
 update_score(float this_frame)
 {
     // NOTE: maybe add score/lose sounds here?
@@ -320,13 +329,15 @@ DrawGameplayScreen(void)
         player_draw(&player);
     }; EndMode3D();
     draw_score();
+    if (should_shake_screen) shake_screen(&shake_float, this_frame);
     if (should_draw_thatwasclose) draw_thatwasclose(&close_float, this_frame);
     if (0.0f >= close_float) should_draw_thatwasclose = 0;
+    if (0.0f >= shake_float) should_shake_screen = 0;
     draw_multiplier();
 
 #ifdef _DEBUG
-    DrawDebugText(1, "should draw? %i", should_draw_thatwasclose);
-    DrawDebugText(2, "close float? %f", close_float);
+    DrawDebugText(1, "should shake? %i", should_shake_screen);
+    DrawDebugText(2, "shake float? %f", shake_float);
     DrawDebugText(3, "player state? %s", ((PLAYER_OUT == player.side)? "OUT"
                                           : (PLAYER_CLOSE == player.side)? "CLOSE"
                                           : "IN"));
