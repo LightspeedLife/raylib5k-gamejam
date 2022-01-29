@@ -10,6 +10,13 @@
 
 static int framesCounter = 0;
 static int finishScreen = 0;
+static const float tick = 0.1f;
+static unsigned long score = 0;
+static unsigned int multiplier = 1;
+static float speed = 24.0f;
+static float sec_per_inc = 5.0f;
+static float sec_accum = 0.0f;
+static float should_draw_thatwasclose = 0.0f;
 static Camera3D camera = { 0 };
 static float camera_distance = 0.0f;
 static float camera_target = -1000.0f;
@@ -51,7 +58,7 @@ static struct obstacles {
     Color colr;
 } g_obstacles[OBSTACLES_LIM];
 Color obs_state_color[2] = { GREEN, RED };
-float ob_pad = 0.5f;
+float ob_pad = 0.15f;
 
 static int g_obstacle_max_width,
            g_obstacle_max_height,
@@ -59,11 +66,11 @@ static int g_obstacle_max_width,
 
 static struct player {
     Vector3 pos;
-    Model body;
     Vector3 scale;
     BoundingBox collision;
-    Matrix transform;
     float speed;
+    int is_close;
+    int became_close;
 } player;
 
 #endif // _GLOBALS_H

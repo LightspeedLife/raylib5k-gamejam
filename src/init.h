@@ -83,26 +83,32 @@ set_game_bounds(float width, float height, float depth, float padding)
 void
 init_player()
 {
-    Mesh m = GenMeshCone(0.5f, 1.5f, 12);
-    UploadMesh(&m, false);
-    player.body = LoadModelFromMesh(m);
-    player.transform = MatrixRotate((Vector3){ 1.0f, 0.0f, 0.0f }, -(2*PI)/4);
+//    Mesh m = GenMeshCone(0.5f, 1.5f, 12);
+//    UploadMesh(&m, false);
+//    player.body = LoadModelFromMesh(m);
+//    player.transform = MatrixRotate((Vector3){ 1.0f, 0.0f, 0.0f }, -(2*PI)/4);
     player.pos = (Vector3){ 0.0f, 0.0f, -2.0f };
     player.scale = (Vector3){ 0.1f, 0.1f, 0.1f };
     player.collision = (BoundingBox){
-        .min = player.pos,
+        .min = (Vector3){
+            player.pos.x -(player.scale.x /2),
+            player.pos.y -(player.scale.y /2),
+            player.pos.z -(player.scale.z /2)
+        },
         .max = (Vector3){
-            player.pos.x +player.scale.x,
-            player.pos.y +player.scale.y,
-            player.pos.z +player.scale.z,
+            player.pos.x +(player.scale.x /2),
+            player.pos.y +(player.scale.y /2),
+            player.pos.z +(player.scale.z /2)
         }
     };
-    Image img = GenImageColor(1, 1, GOLD);
-    Texture txr = LoadTextureFromImage(img);
-    player.body.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = txr;
+ //   Image img = GenImageColor(1, 1, GOLD);
+ //   Texture txr = LoadTextureFromImage(img);
+ //   player.body.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = txr;
  //   UnloadImage(img);
  //   UnloadTexture(txr);
     player.speed = 0.2f;
+    player.is_close = 0;
+    player.became_close = 0;
 }
 
 void

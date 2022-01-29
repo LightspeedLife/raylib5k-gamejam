@@ -26,12 +26,12 @@ spawn_obstacle(struct obstacles *o)
         o[i].size.z = (float)GetRandomValue(1, g_obstacle_max_depth) * 1 +world_units;
 
         // bounding box
-        o[i].close.min.x = o[i].pos.x +ob_pad;
-        o[i].close.min.y = o[i].pos.y +ob_pad;
-        o[i].close.min.z = o[i].pos.z +ob_pad;
-        o[i].close.max.x = o[i].size.x +ob_pad * 2;
-        o[i].close.max.y = o[i].size.y +ob_pad * 2;
-        o[i].close.max.z = o[i].size.z +ob_pad * 2;
+        o[i].close.min.x = o[i].pos.x -(o[i].size.x / 2) -ob_pad;
+        o[i].close.min.y = o[i].pos.y -(o[i].size.y / 2) -ob_pad;
+        o[i].close.min.z = o[i].pos.z -(o[i].size.z / 2) -ob_pad;
+        o[i].close.max.x = o[i].pos.x +(o[i].size.x / 2) +ob_pad;
+        o[i].close.max.y = o[i].pos.y +(o[i].size.y / 2) +ob_pad;
+        o[i].close.max.z = o[i].pos.z +(o[i].size.z / 2) +ob_pad;
     }
 }
 
@@ -46,11 +46,17 @@ update_obstacle(struct obstacles *o, float frame_time)
 {
     for (int i = 0; i < OBSTACLES_LIM; i++) {
         if (!o[i].active) continue;
-        o[i].pos.z += frame_time*o[i].speed;
-        if (CheckCollisionBoxes(o[i].close, player.collision))
-            /* TODO: increment score and say "That was Close!" */;
-        if (collide(o[i].pos, o[i].size, player.pos, player.scale))
+        o[i].pos.z += frame_time * speed;
+        o[i].close.min.z += frame_time * speed;
+        o[i].close.max.z += frame_time * speed;
+        if (player.collision.min.z <= o[i].close.max.z) {
+            if (CheckCollisionBoxes(o[i].close, player.collision)) {
+                /* ACTIVE: increment score and say "That was Close!" */
+                if (!player.is_close) player.became_close = player.is_close = 1;
+            } else player.is_close = 0;
+            if (collide(o[i].pos, o[i].size, player.pos, player.scale))
             /* TODO: go to post-game screen */;
+        }
         if (0 <= o[i].pos.z -o[i].size.z)
             despawn_obstacle(&o[i]);
     }
@@ -60,7 +66,21 @@ void
 draw_obstacles(struct obstacles *o)
 {
     for (int i = 0; i < OBSTACLES_LIM; i++)
-        if (o[i].active) DrawCubeV(o[i].pos, o[i].size, o[i].colr);
+        if (o[i].active)
+            DrawCubeV(o[i].pos , o[i].size, o[i].colr),
+            DrawCubeWiresV(
+/*                (Vector3){ // position
+                    (o[i].close.max.x -o[i].close.min.x) /2,
+                    (o[i].close.max.y -o[i].close.min.y) /2,
+                    (o[i].close.max.z -o[i].close.min.z) /2
+                }, */ o[i].pos,
+                (Vector3){ // size
+                    (o[i].close.max.x -o[i].close.min.x),
+                    (o[i].close.max.y -o[i].close.min.y),
+                    (o[i].close.max.z -o[i].close.min.z)
+                }, BLUE),
+            DrawCubeV(o[i].close.min, (Vector3){ 0.3f, 0.3f, 0.3f }, DARKGREEN),
+            DrawCubeV(o[i].close.max, (Vector3){ 0.3f, 0.3f, 0.3f }, DARKBLUE);
 }
 
 
