@@ -45,4 +45,36 @@ collide(Vector3 a_pos, Vector3 a_size, Vector3 b_pos, Vector3 b_size)
     a_lim.z += a_size.z;    b_lim.z += b_size.z;
     return CheckCollisionBoxes((BoundingBox){ a_pos, a_lim }, (BoundingBox){ b_pos, b_lim });
 }
+
+void
+DrawBoundingBoxVolume(BoundingBox bb, Color c)
+{
+    DrawCubeV(
+        (Vector3){ // position
+            bb.min.x +(bb.max.x -bb.min.x) /2,
+            bb.min.y +(bb.max.y -bb.min.y) /2,
+            bb.min.z +(bb.max.z -bb.min.z) /2,
+        },
+        (Vector3){ // size
+            bb.max.x -(bb.min.x),
+            bb.max.y -(bb.min.y),
+            bb.max.z -(bb.min.z),
+        }, c);
+}
+
+void
+DrawBoundingBoxVolumeWires(BoundingBox bb, Color c)
+{
+    DrawCubeWiresV(
+        (Vector3){ // position
+            bb.min.x +(bb.max.x -bb.min.x) /2,
+            bb.min.y +(bb.max.y -bb.min.y) /2,
+            bb.min.z +(bb.max.z -bb.min.z) /2,
+        },
+        (Vector3){ // size
+            bb.max.x -(bb.min.x),
+            bb.max.y -(bb.min.y),
+            bb.max.z -(bb.min.z),
+        }, c);
+}
 #endif // _UTILS_H
