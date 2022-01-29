@@ -28,6 +28,17 @@ void
 player_draw(struct player *p)
 {
     // DrawModelWiresEx(p->body, p->pos, (Vector3){ 1.0f, 0.0f, 0.0f }, -90.0f, p->scale, WHITE);
+    DrawCylinderEx(
+        (Vector3){
+            p->pos.x,
+            p->pos.y,
+            p->pos.z +p->scale.z/2
+        },
+        (Vector3){
+            p->pos.x,
+            p->pos.y,
+            p->pos.z -p->scale.z/2,
+        }, p->scale.x/2, 0.0f, 12, GOLD);
     DrawCylinderWiresEx(
         (Vector3){
             p->pos.x,
@@ -39,19 +50,19 @@ player_draw(struct player *p)
             p->pos.y,
             p->pos.z -p->scale.z/2,
         }, p->scale.x, 0.0f, 4, GOLD);
-#if 0
-    DrawCubeWiresV(
-        (Vector3){
-            p->collision.min.x +(p->collision.max.x -p->collision.min.x) /2,
-            p->collision.min.y +(p->collision.max.y -p->collision.min.y) /2,
-            p->collision.min.z +(p->collision.max.z -p->collision.min.z) /2,
-        },
-        (Vector3){
-            (p->collision.max.x -p->collision.min.x),
-            (p->collision.max.y -p->collision.min.y),
-            (p->collision.max.z -p->collision.min.z),
-        }, BLUE);
-#endif // 0
+//    DrawCubeWiresV(
+//        (Vector3){
+//            p->collision.min.x +(p->collision.max.x -p->collision.min.x) /2,
+//            p->collision.min.y +(p->collision.max.y -p->collision.min.y) /2,
+//            p->collision.min.z +(p->collision.max.z -p->collision.min.z) /2,
+//        },
+//        (Vector3){
+//            (p->collision.max.x -p->collision.min.x),
+//            (p->collision.max.y -p->collision.min.y),
+//            (p->collision.max.z -p->collision.min.z),
+//        }, BLUE);
+//    DrawBoundingBox(p->collision, PINK);
+//    DrawBoundingBoxVolume(p->collision, GREEN);
 }
 
 void

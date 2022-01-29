@@ -8,15 +8,21 @@
     #define GLSL_VERSION            100
 #endif
 
+#define OBSTACLES_LIM 32
+
+static enum { GAME_NEW, GAME_ONGOING, GAME_OVER, GAME_AGAIN } game_state = GAME_NEW;
 static int framesCounter = 0;
 static int finishScreen = 0;
-static const float tick = 0.1f;
-static unsigned long score = 0;
+static const float tick = 1.0f/30;
+static long long score = 0;
+static long long high_score = 0;
+static long long highest_score = 0;
 static unsigned int multiplier = 1;
-static float speed = 24.0f;
+static float speed = 16.0f;
 static float sec_per_inc = 5.0f;
 static float sec_accum = 0.0f;
-static float should_draw_thatwasclose = 0.0f;
+static int should_draw_thatwasclose = 0.0f;
+static float close_float = 0.0f;
 static Camera3D camera = { 0 };
 static float camera_distance = 0.0f;
 static float camera_target = -1000.0f;
@@ -45,20 +51,18 @@ static struct tunnel {
     Model mo;
 } tunnel;
 
-#define OBSTACLES_LIM 32
-#define OBSTACLES_IS_OOB(ptr) ((g_obstacles >= (ptr)) || (g_obstacles +OBSTACLES_LIM <= (ptr)))
-
 static struct obstacles {
     int id;
     int active;
     Vector3 pos;
     Vector3 size;
+    BoundingBox body;
     BoundingBox close;
     float speed;
     Color colr;
 } g_obstacles[OBSTACLES_LIM];
 Color obs_state_color[2] = { GREEN, RED };
-float ob_pad = 0.15f;
+float ob_pad = 0.25f;
 
 static int g_obstacle_max_width,
            g_obstacle_max_height,
@@ -69,8 +73,7 @@ static struct player {
     Vector3 scale;
     BoundingBox collision;
     float speed;
-    int is_close;
-    int became_close;
+    enum { PLAYER_OUT, PLAYER_CLOSE, PLAYER_IN } side;
 } player;
 
 #endif // _GLOBALS_H

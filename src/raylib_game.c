@@ -22,7 +22,7 @@ Sound fxCoin = { 0 };
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
 //----------------------------------------------------------------------------------
-static const int screenWidth = 800;
+static const int screenWidth = 900;
 static const int screenHeight = 450;
 
 // Required variables to manage screen transitions (fade-in, fade-out)
@@ -199,11 +199,10 @@ static void
 UpdateDrawFrame(void)
 {
     UpdateMusicStream(music);       // NOTE: Music keeps playing between screens
-    UpdateGameplayScreen();
+    update_game_state();
     BeginDrawing();
     {
-        DrawGameplayScreen();
-        DrawFPS(10, 10);
+        draw_game();
     }
     EndDrawing();
     //----------------------------------------------------------------------------------

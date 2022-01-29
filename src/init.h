@@ -12,7 +12,7 @@ init_obstacles(struct obstacles *obstacles)
 	for (int i = 0; i < OBSTACLES_LIM; i++) {
         obstacles[i].id = i;
 		obstacles[i].active = 0;
-        obstacles[i].speed = 24.0;
+        obstacles[i].speed = 1.0f;
         obstacles[i].colr = RED;
 	}
 }
@@ -113,7 +113,6 @@ init_player()
 void
 InitGameplayScreen(void)
 {
-    SetTraceLogLevel(LOG_DEBUG);
     framesCounter = 0;
     finishScreen = 0;
 

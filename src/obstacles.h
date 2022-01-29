@@ -14,6 +14,7 @@ spawn_obstacle(struct obstacles *o)
 
     struct obstacles *obj = &o[i];
     obj->active = 1;
+    obj->colr = RED;
     {
         obj->pos.x =
             (float)GetRandomValue(game_bounds.shape.x, game_bounds.shape.x +game_bounds.shape.width)
@@ -77,17 +78,15 @@ update_obstacle(struct obstacles *o, float frame_time)
         o[i].close.max.z += frame_time * speed;
 
         if (player.collision.min.z <= o[i].close.max.z) { // player can collide
-            o[i].colr = GREEN;
+//            o[i].colr = GREEN;
             if (CheckCollisionBoxes(o[i].body, player.collision)) {
                 player.side = PLAYER_IN;
                 o[i].colr = BLUE;
-                /* TODO: go to post-game screen */
             } else if (CheckCollisionBoxes(o[i].close, player.collision)) {
                 player.side = PLAYER_CLOSE;
-                o[i].colr = PURPLE;
-                /* ACTIVE: increment score and say "That was Close!" */
+//                o[i].colr = PURPLE;
             } else player.side = PLAYER_OUT;
-        } else o[i].colr = RED;
+        } // else o[i].colr = RED;
         if (0 <= o[i].body.min.z)
             despawn_obstacle(&o[i]);
     }
@@ -96,13 +95,16 @@ update_obstacle(struct obstacles *o, float frame_time)
 void
 draw_obstacles(struct obstacles *o)
 {
+//    BeginShaderMode(shader);
     for (int i = 0; i < OBSTACLES_LIM; i++)
-        if (o[i].active)
+        if (o[i].active) {
 //            DrawCubeV(o[i].pos , o[i].size, o[i].colr),
-            DrawBoundingBoxVolume(o[i].body, o[i].colr),
-            DrawBoundingBoxVolumeWires(o[i].close, BLUE),
-            DrawCubeV(o[i].close.min, (Vector3){ 0.3f, 0.3f, 0.3f }, DARKGREEN),
-            DrawCubeV(o[i].close.max, (Vector3){ 0.3f, 0.3f, 0.3f }, DARKBLUE);
+            DrawBoundingBoxVolume(o[i].body, o[i].colr);
+            DrawBoundingBoxVolumeWires(o[i].close, BLUE);
+//            DrawCubeV(o[i].close.min, (Vector3){ 0.3f, 0.3f, 0.3f }, DARKGREEN),
+//            DrawCubeV(o[i].close.max, (Vector3){ 0.3f, 0.3f, 0.3f }, DARKBLUE);
+        }
+//    EndShaderMode();
 }
 
 

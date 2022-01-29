@@ -23,7 +23,6 @@
 *
 **********************************************************************************************/
 
-#include <stdio.h>
 #include "raylib.h"
 #include "raymath.h"
 // DONE: Get tunnel/movement
@@ -35,7 +34,7 @@
     // TODO: obstacle speed rate adjust
     // TODO: obstacle spawn rate adjust
 // TODO: Pickups
-// TODO: scoring
+// DONE: scoring
 // DONE: collision -- now it's ACTUALLY DONE!
 // DONE: Player movement
 // TODO: music
@@ -96,6 +95,7 @@ update_score(float this_frame)
     static int was_close = 0;
     this_tick += this_frame;
     sec_accum += this_frame;
+    if (tick < this_tick) this_tick = 0.0f;
 
     switch (player.side) {
         case PLAYER_CLOSE: {
@@ -103,10 +103,7 @@ update_score(float this_frame)
                 was_close = 1;
                 close_float = 1.0f;
             }
-            if (tick < this_tick) {
-                score += multiplier;
-                this_tick = 0.0f;
-            }
+            if (tick < this_tick) score += multiplier;
         } break;
         case PLAYER_IN: {
             was_close = 0;
@@ -114,7 +111,11 @@ update_score(float this_frame)
                 score -= multiplier * 10;
                 sec_accum = 0.0f;
                 multiplier = 1; // :'C  I weep for thee
-            } else score -= 100;
+            } else score -= 10;
+            if (0 < score) {
+                should_shake_screen = 1;
+                shake_float = 0.5f;
+            }
         } break;
         default: {
             if (was_close) should_draw_thatwasclose = 1;
@@ -123,9 +124,27 @@ update_score(float this_frame)
     }
     if (sec_per_inc < sec_accum) {
         multiplier++;
-        score += 10;
+        score += 100;
         sec_accum = 0.0f;
     }
+    if (score > high_score) high_score = score;
+    if (high_score > highest_score) highest_score = high_score;
+    if (0.0f > score) game_state = GAME_OVER;
+}
+
+void
+reset(void)
+{
+    framesCounter = 0;
+    finishScreen = 0;
+    score = high_score = 0;
+    camera.position = (Vector3){ 0.0f, 0.0f, camera_distance };  // Camera position
+    camera.target = (Vector3){ 0.0f, 0.0f, camera_target };    // Camera looking at point
+    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
+    camera.fovy = 90.0f;                                // Camera field-of-view Y
+    camera.projection = CAMERA_PERSPECTIVE;             // Camera mode type
+    init_obstacles(g_obstacles);
+    init_player();
 }
 
 void UpdateGameplayScreen(void);
@@ -135,14 +154,21 @@ update_game_state(void)
 {
     switch (game_state) {
         case GAME_NEW: {
-            // TODO: handle new game
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                game_state = GAME_ONGOING;
         } break;
         case GAME_ONGOING: {
             UpdateGameplayScreen();
         } break;
         case GAME_OVER: {
-            // TODO: handle game over
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                game_state = GAME_AGAIN;
+        } break;
+        case GAME_AGAIN: {
+            reset();
+            game_state = GAME_ONGOING;
         }
+        default:;
     }
 }
 
@@ -161,11 +187,11 @@ UpdateGameplayScreen(void)
         time_since_spawn = 0.0f;
     }
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        DisableCursor();
         player_update(&player, delta, this_frame);
-    } else EnableCursor();
+    }
     camera_update(&camera, player.pos, this_frame);
 
+#if _DEBUG
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
         camera.position.z += delta.y;
     } if ((0.0f == delta.x && 0.0f == delta.y)
@@ -199,9 +225,88 @@ UpdateGameplayScreen(void)
         fogColor.y += x;
         fogColor.z += x;
     }
+#endif // 0
+
     SetShaderValue(shader, fogColorLoc, &fogColor, SHADER_UNIFORM_VEC4);
     // Update the light shader with the camera view position
     // SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], &camera.position.x, SHADER_UNIFORM_VEC3);
+}
+
+void DrawGameplayScreen(void);
+void draw_endgame(void);
+void draw_newgame(void);
+static float endgame_prompt_counter;
+
+void
+draw_game(void)
+{
+    switch (game_state) {
+    case GAME_NEW: {
+        draw_newgame();
+    } break;
+    case GAME_ONGOING: {
+        DisableCursor();
+        endgame_prompt_counter = 2.0f;
+        DrawGameplayScreen();
+    } break;
+    case GAME_OVER: {
+        draw_endgame();
+    } break;
+    default:;
+    }
+}
+
+void
+draw_newgame(void)
+{
+    ClearBackground(WHITE);
+    BeginMode3D(camera); {
+        DrawModel(tunnel.mo, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, tunnelColor);
+        draw_obstacles(g_obstacles);
+        player_draw(&player);
+    }; EndMode3D();
+    {
+        static char prompt[32] = "Click or tap to begin.";
+        static const unsigned int font_size = 36;
+        unsigned int text_len = MeasureText(prompt, font_size);
+        DrawText(prompt, GetScreenWidth()/2 -text_len/2, GetScreenHeight()/2, font_size, GREEN);
+    }
+}
+
+void
+draw_endgame(void)
+{
+    ClearBackground(WHITE);
+    BeginMode3D(camera); {
+        DrawModel(tunnel.mo, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, tunnelColor);
+        draw_obstacles(g_obstacles);
+        player_draw(&player);
+    }; EndMode3D();
+    { // "game over"
+        static const char game_over[] = "GAME OVER";
+        static const unsigned int font_size = 64;
+        unsigned int text_len = MeasureText(game_over, font_size);
+        DrawText("GAME OVER", GetScreenWidth()/2 -text_len/2,
+                GetScreenHeight()/4, font_size, GOLD);
+    } {
+        static char your_score[128] = "Your Score Was: ";
+        static const unsigned int font_size = 48;
+        sprintf(your_score +16, "%lld", high_score);
+        unsigned int text_len = MeasureText(your_score, font_size);
+        DrawText(your_score, GetScreenWidth()/2 -text_len/2, GetScreenHeight()/2, font_size, GOLD);
+    } {
+        static char your_score[128] = "Highest: ";
+        static const unsigned int font_size = 48;
+        sprintf(your_score +9, "%lld", highest_score);
+        unsigned int text_len = MeasureText(your_score, font_size);
+        DrawText(your_score, GetScreenWidth()/2 -text_len/2, GetScreenHeight()/2 +font_size +10, font_size, GOLD);
+    }
+    if (0.0f > (endgame_prompt_counter -= GetFrameTime())) {
+        static char prompt[32] = "Click or tap to try again.";
+        static const unsigned int font_size = 36;
+        unsigned int text_len = MeasureText(prompt, font_size);
+        DrawText(prompt, GetScreenWidth()/2 -text_len/2, 3 * (GetScreenHeight()/4), font_size, GREEN);
+    }
 }
 
 void
