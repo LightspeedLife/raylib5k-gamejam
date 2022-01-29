@@ -36,7 +36,7 @@
     // TODO: obstacle spawn rate adjust
 // TODO: Pickups
 // TODO: scoring
-// DONE: collision
+// DONE: collision -- now it's ACTUALLY DONE!
 // DONE: Player movement
 // TODO: music
 
@@ -100,10 +100,6 @@ update_score(float this_frame)
         sec_accum = 0.0f;
     }
     if (player.is_close) {
-        if (player.became_close) {
-            should_draw_thatwasclose = 1.0f;
-            player.became_close = 0;
-        }
         if (tick < this_tick) {
             score += multiplier;
             this_tick = 0.0f;
